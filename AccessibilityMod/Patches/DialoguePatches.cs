@@ -1,10 +1,10 @@
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
-using HarmonyLib;
-using UnityEngine;
 using AccessibilityMod.Core;
 using AccessibilityMod.Services;
+using HarmonyLib;
+using UnityEngine;
 
 namespace AccessibilityMod.Patches
 {
@@ -15,7 +15,10 @@ namespace AccessibilityMod.Patches
         private static int _lastSpeakerId = -1;
 
         // Regex for detecting button placeholders (multiple spaces or full-width spaces)
-        private static readonly Regex SpacePlaceholderRegex = new Regex(@"[\u3000]+| {3,}", RegexOptions.Compiled);
+        private static readonly Regex SpacePlaceholderRegex = new Regex(
+            @"[\u3000]+| {3,}",
+            RegexOptions.Compiled
+        );
 
         // Hook when arrow appears - this means the text is ready to be read
         [HarmonyPostfix]
@@ -32,7 +35,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Arrow patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Arrow patch: {ex.Message}"
+                );
             }
         }
 
@@ -52,14 +57,21 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Board patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Board patch: {ex.Message}"
+                );
             }
         }
 
         // Hook when speaker name changes
         [HarmonyPostfix]
         [HarmonyPatch(typeof(messageBoardCtrl), "name_plate")]
-        public static void NamePlate_Postfix(messageBoardCtrl __instance, bool in_name, int in_name_no, int in_pos)
+        public static void NamePlate_Postfix(
+            messageBoardCtrl __instance,
+            bool in_name,
+            int in_name_no,
+            int in_pos
+        )
         {
             try
             {
@@ -75,7 +87,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in NamePlate patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in NamePlate patch: {ex.Message}"
+                );
             }
         }
 
@@ -93,7 +107,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in LoadMsgSet patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in LoadMsgSet patch: {ex.Message}"
+                );
             }
         }
 
@@ -126,7 +142,9 @@ namespace AccessibilityMod.Patches
                     {
                         if (GSStatic.message_work_ != null && GSStatic.message_work_.speaker_id > 0)
                         {
-                            speakerName = CharacterNameService.GetName(GSStatic.message_work_.speaker_id);
+                            speakerName = CharacterNameService.GetName(
+                                GSStatic.message_work_.speaker_id
+                            );
                         }
                     }
                     catch { }
@@ -136,7 +154,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error outputting dialogue: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error outputting dialogue: {ex.Message}"
+                );
             }
         }
 
@@ -181,7 +201,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error replacing button placeholders: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error replacing button placeholders: {ex.Message}"
+                );
                 return text;
             }
         }
@@ -196,20 +218,34 @@ namespace AccessibilityMod.Patches
                 // Controller button names (Xbox style)
                 switch (keyType)
                 {
-                    case KeyType.A: return "A";
-                    case KeyType.B: return "B";
-                    case KeyType.X: return "X";
-                    case KeyType.Y: return "Y";
-                    case KeyType.L: return "LB";
-                    case KeyType.R: return "RB";
-                    case KeyType.ZL: return "LT";
-                    case KeyType.ZR: return "RT";
-                    case KeyType.Start: return "Menu";
-                    case KeyType.Select: return "View";
-                    case KeyType.StickL: return "Left Stick";
-                    case KeyType.StickR: return "Right Stick";
-                    case KeyType.Record: return "RB";
-                    default: return keyType.ToString();
+                    case KeyType.A:
+                        return "A";
+                    case KeyType.B:
+                        return "B";
+                    case KeyType.X:
+                        return "X";
+                    case KeyType.Y:
+                        return "Y";
+                    case KeyType.L:
+                        return "LB";
+                    case KeyType.R:
+                        return "RB";
+                    case KeyType.ZL:
+                        return "LT";
+                    case KeyType.ZR:
+                        return "RT";
+                    case KeyType.Start:
+                        return "Menu";
+                    case KeyType.Select:
+                        return "View";
+                    case KeyType.StickL:
+                        return "Left Stick";
+                    case KeyType.StickR:
+                        return "Right Stick";
+                    case KeyType.Record:
+                        return "RB";
+                    default:
+                        return keyType.ToString();
                 }
             }
             else
@@ -231,27 +267,48 @@ namespace AccessibilityMod.Patches
         {
             switch (keyCode)
             {
-                case KeyCode.Space: return "Space";
-                case KeyCode.Return: return "Enter";
-                case KeyCode.Escape: return "Escape";
-                case KeyCode.Tab: return "Tab";
-                case KeyCode.Backspace: return "Backspace";
-                case KeyCode.Delete: return "Delete";
-                case KeyCode.Insert: return "Insert";
-                case KeyCode.Home: return "Home";
-                case KeyCode.End: return "End";
-                case KeyCode.PageUp: return "Page Up";
-                case KeyCode.PageDown: return "Page Down";
-                case KeyCode.UpArrow: return "Up Arrow";
-                case KeyCode.DownArrow: return "Down Arrow";
-                case KeyCode.LeftArrow: return "Left Arrow";
-                case KeyCode.RightArrow: return "Right Arrow";
-                case KeyCode.LeftShift: return "Left Shift";
-                case KeyCode.RightShift: return "Right Shift";
-                case KeyCode.LeftControl: return "Left Ctrl";
-                case KeyCode.RightControl: return "Right Ctrl";
-                case KeyCode.LeftAlt: return "Left Alt";
-                case KeyCode.RightAlt: return "Right Alt";
+                case KeyCode.Space:
+                    return "Space";
+                case KeyCode.Return:
+                    return "Enter";
+                case KeyCode.Escape:
+                    return "Escape";
+                case KeyCode.Tab:
+                    return "Tab";
+                case KeyCode.Backspace:
+                    return "Backspace";
+                case KeyCode.Delete:
+                    return "Delete";
+                case KeyCode.Insert:
+                    return "Insert";
+                case KeyCode.Home:
+                    return "Home";
+                case KeyCode.End:
+                    return "End";
+                case KeyCode.PageUp:
+                    return "Page Up";
+                case KeyCode.PageDown:
+                    return "Page Down";
+                case KeyCode.UpArrow:
+                    return "Up Arrow";
+                case KeyCode.DownArrow:
+                    return "Down Arrow";
+                case KeyCode.LeftArrow:
+                    return "Left Arrow";
+                case KeyCode.RightArrow:
+                    return "Right Arrow";
+                case KeyCode.LeftShift:
+                    return "Left Shift";
+                case KeyCode.RightShift:
+                    return "Right Shift";
+                case KeyCode.LeftControl:
+                    return "Left Ctrl";
+                case KeyCode.RightControl:
+                    return "Right Ctrl";
+                case KeyCode.LeftAlt:
+                    return "Left Alt";
+                case KeyCode.RightAlt:
+                    return "Right Alt";
                 default:
                     string name = keyCode.ToString();
                     if (name.StartsWith("Alpha"))

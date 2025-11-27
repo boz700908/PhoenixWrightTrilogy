@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using AccessibilityMod.Core;
 using HarmonyLib;
 using UnityEngine.UI;
-using AccessibilityMod.Core;
 
 namespace AccessibilityMod.Patches
 {
@@ -27,7 +27,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in SaveLoad Open patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in SaveLoad Open patch: {ex.Message}"
+                );
             }
         }
 
@@ -47,7 +49,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in SaveLoad UpdateCursorPosition patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in SaveLoad UpdateCursorPosition patch: {ex.Message}"
+                );
             }
         }
 
@@ -55,8 +59,11 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                var field = typeof(SaveLoadUICtrl).GetField("select_num_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var field = typeof(SaveLoadUICtrl).GetField(
+                    "select_num_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
                 if (field != null)
                 {
                     return (int)field.GetValue(ctrl);
@@ -76,8 +83,11 @@ namespace AccessibilityMod.Patches
                 // Try to get more info via reflection if available
                 try
                 {
-                    var slotListField = typeof(SaveLoadUICtrl).GetField("slot_list_",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var slotListField = typeof(SaveLoadUICtrl).GetField(
+                        "slot_list_",
+                        System.Reflection.BindingFlags.NonPublic
+                            | System.Reflection.BindingFlags.Instance
+                    );
 
                     if (slotListField != null)
                     {
@@ -104,7 +114,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error announcing slot: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error announcing slot: {ex.Message}"
+                );
             }
         }
 
@@ -112,8 +124,11 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                var field = typeof(SaveLoadUICtrl).GetField("slot_type_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var field = typeof(SaveLoadUICtrl).GetField(
+                    "slot_type_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
                 if (field != null)
                 {
                     return (int)field.GetValue(ctrl);
@@ -136,7 +151,8 @@ namespace AccessibilityMod.Patches
         private static FieldInfo _optionTitleField;
         private static FieldInfo _titleBackTextField;
 
-        private static readonly BindingFlags NonPublicInstance = BindingFlags.NonPublic | BindingFlags.Instance;
+        private static readonly BindingFlags NonPublicInstance =
+            BindingFlags.NonPublic | BindingFlags.Instance;
 
         // Tooltip delay in seconds
         private const float TooltipDelay = 2.0f;
@@ -163,7 +179,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Options ChangeCategory patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Options ChangeCategory patch: {ex.Message}"
+                );
             }
         }
 
@@ -201,7 +219,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Options SelectItemSet patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Options SelectItemSet patch: {ex.Message}"
+                );
             }
         }
 
@@ -220,7 +240,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error scheduling tooltip: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error scheduling tooltip: {ex.Message}"
+                );
             }
         }
 
@@ -229,12 +251,16 @@ namespace AccessibilityMod.Patches
             try
             {
                 if (_titleBackTextField == null)
-                    _titleBackTextField = typeof(optionCtrl).GetField("title_back_text_", NonPublicInstance);
+                    _titleBackTextField = typeof(optionCtrl).GetField(
+                        "title_back_text_",
+                        NonPublicInstance
+                    );
 
                 if (_titleBackTextField == null)
                     return null;
 
-                var titleBackTextList = _titleBackTextField.GetValue(instance) as List<UnityEngine.UI.Text>;
+                var titleBackTextList =
+                    _titleBackTextField.GetValue(instance) as List<UnityEngine.UI.Text>;
                 if (titleBackTextList == null || titleBackTextList.Count == 0)
                     return null;
 
@@ -256,7 +282,9 @@ namespace AccessibilityMod.Patches
                 if (!Net35Extensions.IsNullOrWhiteSpace(line1))
                     tooltip = line1;
                 if (!Net35Extensions.IsNullOrWhiteSpace(line2))
-                    tooltip = Net35Extensions.IsNullOrWhiteSpace(tooltip) ? line2 : tooltip + " " + line2;
+                    tooltip = Net35Extensions.IsNullOrWhiteSpace(tooltip)
+                        ? line2
+                        : tooltip + " " + line2;
 
                 return tooltip;
             }
@@ -300,11 +328,7 @@ namespace AccessibilityMod.Patches
 
             // Replace sequences of 3 or more regular spaces
             // Pattern: look for 3+ consecutive spaces
-            text = System.Text.RegularExpressions.Regex.Replace(
-                text,
-                " {3,}",
-                $" [{keyName}] "
-            );
+            text = System.Text.RegularExpressions.Regex.Replace(text, " {3,}", $" [{keyName}] ");
 
             return text;
         }
@@ -335,7 +359,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"GetCurrentKeyName error: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"GetCurrentKeyName error: {ex.Message}"
+                );
                 return null;
             }
         }
@@ -350,8 +376,8 @@ namespace AccessibilityMod.Patches
                 case 3: // SKIP - has B button prompt
                     return KeyType.B;
 
-                case 7:  // LANGUAGE - has A button prompt
-                case 8:  // VOICE_LANG - has A button prompt
+                case 7: // LANGUAGE - has A button prompt
+                case 8: // VOICE_LANG - has A button prompt
                     return KeyType.A;
 
                 // Most options don't have button prompts
@@ -370,19 +396,32 @@ namespace AccessibilityMod.Patches
                 // Controller button names (Xbox style)
                 switch (keyType)
                 {
-                    case KeyType.A: return "A";
-                    case KeyType.B: return "B";
-                    case KeyType.X: return "X";
-                    case KeyType.Y: return "Y";
-                    case KeyType.L: return "LB";
-                    case KeyType.R: return "RB";
-                    case KeyType.ZL: return "LT";
-                    case KeyType.ZR: return "RT";
-                    case KeyType.Start: return "Menu";
-                    case KeyType.Select: return "View";
-                    case KeyType.StickL: return "Left Stick";
-                    case KeyType.StickR: return "Right Stick";
-                    default: return keyType.ToString();
+                    case KeyType.A:
+                        return "A";
+                    case KeyType.B:
+                        return "B";
+                    case KeyType.X:
+                        return "X";
+                    case KeyType.Y:
+                        return "Y";
+                    case KeyType.L:
+                        return "LB";
+                    case KeyType.R:
+                        return "RB";
+                    case KeyType.ZL:
+                        return "LT";
+                    case KeyType.ZR:
+                        return "RT";
+                    case KeyType.Start:
+                        return "Menu";
+                    case KeyType.Select:
+                        return "View";
+                    case KeyType.StickL:
+                        return "Left Stick";
+                    case KeyType.StickR:
+                        return "Right Stick";
+                    default:
+                        return keyType.ToString();
                 }
             }
             else
@@ -404,27 +443,48 @@ namespace AccessibilityMod.Patches
         {
             switch (keyCode)
             {
-                case UnityEngine.KeyCode.Space: return "Space";
-                case UnityEngine.KeyCode.Return: return "Enter";
-                case UnityEngine.KeyCode.Escape: return "Escape";
-                case UnityEngine.KeyCode.Tab: return "Tab";
-                case UnityEngine.KeyCode.Backspace: return "Backspace";
-                case UnityEngine.KeyCode.Delete: return "Delete";
-                case UnityEngine.KeyCode.Insert: return "Insert";
-                case UnityEngine.KeyCode.Home: return "Home";
-                case UnityEngine.KeyCode.End: return "End";
-                case UnityEngine.KeyCode.PageUp: return "Page Up";
-                case UnityEngine.KeyCode.PageDown: return "Page Down";
-                case UnityEngine.KeyCode.UpArrow: return "Up Arrow";
-                case UnityEngine.KeyCode.DownArrow: return "Down Arrow";
-                case UnityEngine.KeyCode.LeftArrow: return "Left Arrow";
-                case UnityEngine.KeyCode.RightArrow: return "Right Arrow";
-                case UnityEngine.KeyCode.LeftShift: return "Left Shift";
-                case UnityEngine.KeyCode.RightShift: return "Right Shift";
-                case UnityEngine.KeyCode.LeftControl: return "Left Ctrl";
-                case UnityEngine.KeyCode.RightControl: return "Right Ctrl";
-                case UnityEngine.KeyCode.LeftAlt: return "Left Alt";
-                case UnityEngine.KeyCode.RightAlt: return "Right Alt";
+                case UnityEngine.KeyCode.Space:
+                    return "Space";
+                case UnityEngine.KeyCode.Return:
+                    return "Enter";
+                case UnityEngine.KeyCode.Escape:
+                    return "Escape";
+                case UnityEngine.KeyCode.Tab:
+                    return "Tab";
+                case UnityEngine.KeyCode.Backspace:
+                    return "Backspace";
+                case UnityEngine.KeyCode.Delete:
+                    return "Delete";
+                case UnityEngine.KeyCode.Insert:
+                    return "Insert";
+                case UnityEngine.KeyCode.Home:
+                    return "Home";
+                case UnityEngine.KeyCode.End:
+                    return "End";
+                case UnityEngine.KeyCode.PageUp:
+                    return "Page Up";
+                case UnityEngine.KeyCode.PageDown:
+                    return "Page Down";
+                case UnityEngine.KeyCode.UpArrow:
+                    return "Up Arrow";
+                case UnityEngine.KeyCode.DownArrow:
+                    return "Down Arrow";
+                case UnityEngine.KeyCode.LeftArrow:
+                    return "Left Arrow";
+                case UnityEngine.KeyCode.RightArrow:
+                    return "Right Arrow";
+                case UnityEngine.KeyCode.LeftShift:
+                    return "Left Shift";
+                case UnityEngine.KeyCode.RightShift:
+                    return "Right Shift";
+                case UnityEngine.KeyCode.LeftControl:
+                    return "Left Ctrl";
+                case UnityEngine.KeyCode.RightControl:
+                    return "Right Ctrl";
+                case UnityEngine.KeyCode.LeftAlt:
+                    return "Left Alt";
+                case UnityEngine.KeyCode.RightAlt:
+                    return "Right Alt";
                 default:
                     // For letters and numbers, just return the key name
                     string name = keyCode.ToString();
@@ -505,7 +565,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error announcing option value: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error announcing option value: {ex.Message}"
+                );
             }
         }
 
@@ -514,7 +576,10 @@ namespace AccessibilityMod.Patches
             try
             {
                 if (_currentNumField == null)
-                    _currentNumField = typeof(optionCtrl).GetField("current_num_", NonPublicInstance);
+                    _currentNumField = typeof(optionCtrl).GetField(
+                        "current_num_",
+                        NonPublicInstance
+                    );
 
                 if (_currentNumField != null)
                     return (int)_currentNumField.GetValue(ctrl);
@@ -528,7 +593,10 @@ namespace AccessibilityMod.Patches
             try
             {
                 if (_availableOptionField == null)
-                    _availableOptionField = typeof(optionCtrl).GetField("available_option_", NonPublicInstance);
+                    _availableOptionField = typeof(optionCtrl).GetField(
+                        "available_option_",
+                        NonPublicInstance
+                    );
 
                 if (_availableOptionField != null)
                     return _availableOptionField.GetValue(ctrl) as List<optionItem>;
@@ -542,7 +610,10 @@ namespace AccessibilityMod.Patches
             try
             {
                 if (_optionTitleField == null)
-                    _optionTitleField = typeof(optionItem).GetField("option_title_", NonPublicInstance);
+                    _optionTitleField = typeof(optionItem).GetField(
+                        "option_title_",
+                        NonPublicInstance
+                    );
 
                 if (_optionTitleField != null)
                 {
@@ -573,7 +644,10 @@ namespace AccessibilityMod.Patches
                         if (countTextField != null)
                         {
                             var countText = countTextField.GetValue(gauge) as Text;
-                            if (countText != null && !Net35Extensions.IsNullOrWhiteSpace(countText.text))
+                            if (
+                                countText != null
+                                && !Net35Extensions.IsNullOrWhiteSpace(countText.text)
+                            )
                             {
                                 return countText.text;
                             }
@@ -590,7 +664,11 @@ namespace AccessibilityMod.Patches
                 {
                     var selectTexts = selectTextField.GetValue(item) as string[];
                     int settingValue = (int)settingValueField.GetValue(item);
-                    if (selectTexts != null && settingValue >= 0 && settingValue < selectTexts.Length)
+                    if (
+                        selectTexts != null
+                        && settingValue >= 0
+                        && settingValue < selectTexts.Length
+                    )
                     {
                         return selectTexts[settingValue];
                     }
@@ -612,7 +690,10 @@ namespace AccessibilityMod.Patches
         {
             while (type != null && type != typeof(object))
             {
-                var field = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
+                var field = type.GetField(
+                    fieldName,
+                    BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance
+                );
                 if (field != null)
                     return field;
                 type = type.BaseType;
@@ -624,18 +705,27 @@ namespace AccessibilityMod.Patches
         {
             switch (category)
             {
-                case optionCtrl.Category.SAVE_LOAD: return "Save/Load";
-                case optionCtrl.Category.SOUND: return "Sound";
-                case optionCtrl.Category.GAME: return "Game";
-                case optionCtrl.Category.LANGUAGE: return "Language";
-                case optionCtrl.Category.PC: return "Display";
-                case optionCtrl.Category.KEYCONFIG: return "Key Config";
-                case optionCtrl.Category.STORY: return "Story";
-                case optionCtrl.Category.CREDIT: return "Credits";
-                case optionCtrl.Category.PRIVACY: return "Privacy";
-                default: return category.ToString();
+                case optionCtrl.Category.SAVE_LOAD:
+                    return "Save/Load";
+                case optionCtrl.Category.SOUND:
+                    return "Sound";
+                case optionCtrl.Category.GAME:
+                    return "Game";
+                case optionCtrl.Category.LANGUAGE:
+                    return "Language";
+                case optionCtrl.Category.PC:
+                    return "Display";
+                case optionCtrl.Category.KEYCONFIG:
+                    return "Key Config";
+                case optionCtrl.Category.STORY:
+                    return "Story";
+                case optionCtrl.Category.CREDIT:
+                    return "Credits";
+                case optionCtrl.Category.PRIVACY:
+                    return "Privacy";
+                default:
+                    return category.ToString();
             }
         }
     }
-
 }

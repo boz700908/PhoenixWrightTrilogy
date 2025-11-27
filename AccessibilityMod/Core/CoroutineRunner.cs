@@ -64,7 +64,8 @@ namespace AccessibilityMod.Core
             try
             {
                 var instance = selectPlateCtrl.instance;
-                if (instance == null) return;
+                if (instance == null)
+                    return;
 
                 bool isActive = instance.body_active;
                 int cursorNo = instance.cursor_no;
@@ -100,19 +101,26 @@ namespace AccessibilityMod.Core
             try
             {
                 var instance = selectPlateCtrl.instance;
-                if (instance == null) return null;
+                if (instance == null)
+                    return null;
 
                 // Access the select_list_ field via reflection or by reading the text directly
-                var field = typeof(selectPlateCtrl).GetField("select_list_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (field == null) return null;
+                var field = typeof(selectPlateCtrl).GetField(
+                    "select_list_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return null;
 
                 var selectList = field.GetValue(instance) as System.Collections.IList;
-                if (selectList == null || index < 0 || index >= selectList.Count) return null;
+                if (selectList == null || index < 0 || index >= selectList.Count)
+                    return null;
 
                 var selectPlate = selectList[index];
                 var textField = selectPlate.GetType().GetField("text_");
-                if (textField == null) return null;
+                if (textField == null)
+                    return null;
 
                 var textComponent = textField.GetValue(selectPlate) as UnityEngine.UI.Text;
                 return textComponent?.text;
@@ -129,14 +137,20 @@ namespace AccessibilityMod.Core
             {
                 // Check mainTitleCtrl's select_plate_
                 var mainTitle = mainTitleCtrl.instance;
-                if (mainTitle == null) return;
+                if (mainTitle == null)
+                    return;
 
-                var field = typeof(mainTitleCtrl).GetField("select_plate_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (field == null) return;
+                var field = typeof(mainTitleCtrl).GetField(
+                    "select_plate_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return;
 
                 var selectPlate = field.GetValue(mainTitle) as titleSelectPlate;
-                if (selectPlate == null) return;
+                if (selectPlate == null)
+                    return;
 
                 bool isActive = selectPlate.body_active;
                 int cursorNo = selectPlate.cursor_no;
@@ -171,22 +185,33 @@ namespace AccessibilityMod.Core
         {
             try
             {
-                var field = typeof(mainTitleCtrl).GetField("select_text_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (field == null) return null;
+                var field = typeof(mainTitleCtrl).GetField(
+                    "select_text_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return null;
 
                 var selectText = field.GetValue(mainTitle) as titleSelectPlate.ButtonParam[][];
-                if (selectText == null) return null;
+                if (selectText == null)
+                    return null;
 
-                var typeField = typeof(mainTitleCtrl).GetField("select_type_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (typeField == null) return null;
+                var typeField = typeof(mainTitleCtrl).GetField(
+                    "select_type_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (typeField == null)
+                    return null;
 
                 int selectType = (int)typeField.GetValue(mainTitle);
-                if (selectType < 0 || selectType >= selectText.Length) return null;
+                if (selectType < 0 || selectType >= selectText.Length)
+                    return null;
 
                 var options = selectText[selectType];
-                if (options == null || index < 0 || index >= options.Length) return null;
+                if (options == null || index < 0 || index >= options.Length)
+                    return null;
 
                 return options[index].message_;
             }
@@ -202,14 +227,20 @@ namespace AccessibilityMod.Core
             {
                 // Check seriesTitleSelectCtrl's select_plate_
                 var seriesCtrl = seriesTitleSelectCtrl.instance;
-                if (seriesCtrl == null) return;
+                if (seriesCtrl == null)
+                    return;
 
-                var field = typeof(seriesTitleSelectCtrl).GetField("select_plate_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (field == null) return;
+                var field = typeof(seriesTitleSelectCtrl).GetField(
+                    "select_plate_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return;
 
                 var selectPlate = field.GetValue(seriesCtrl) as titleSelectPlate;
-                if (selectPlate == null) return;
+                if (selectPlate == null)
+                    return;
 
                 bool isActive = selectPlate.body_active;
                 int cursorNo = selectPlate.cursor_no;
@@ -218,9 +249,10 @@ namespace AccessibilityMod.Core
                 if (isActive && _lastSeriesSelectActive && cursorNo != _lastSeriesSelectCursor)
                 {
                     // Options are: Play Title (0), Select Episode (1)
-                    string optionText = cursorNo == 0
-                        ? TextDataCtrl.GetText(TextDataCtrl.TitleTextID.PLAY_TITLE)
-                        : TextDataCtrl.GetText(TextDataCtrl.TitleTextID.SELECT_EPISODE);
+                    string optionText =
+                        cursorNo == 0
+                            ? TextDataCtrl.GetText(TextDataCtrl.TitleTextID.PLAY_TITLE)
+                            : TextDataCtrl.GetText(TextDataCtrl.TitleTextID.SELECT_EPISODE);
 
                     if (!Net35Extensions.IsNullOrWhiteSpace(optionText))
                     {
@@ -250,21 +282,34 @@ namespace AccessibilityMod.Core
             {
                 // Check ChapterJumpInMenuCtrl's select_plate
                 var chapterJump = ChapterJumpCtrl.instance;
-                if (chapterJump == null) return;
+                if (chapterJump == null)
+                    return;
 
-                var menuField = typeof(ChapterJumpCtrl).GetField("menuCtrl",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (menuField == null) return;
+                var menuField = typeof(ChapterJumpCtrl).GetField(
+                    "menuCtrl",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (menuField == null)
+                    return;
 
                 var menuCtrl = menuField.GetValue(chapterJump);
-                if (menuCtrl == null) return;
+                if (menuCtrl == null)
+                    return;
 
-                var plateField = menuCtrl.GetType().GetField("select_plate",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (plateField == null) return;
+                var plateField = menuCtrl
+                    .GetType()
+                    .GetField(
+                        "select_plate",
+                        System.Reflection.BindingFlags.NonPublic
+                            | System.Reflection.BindingFlags.Instance
+                    );
+                if (plateField == null)
+                    return;
 
                 var selectPlate = plateField.GetValue(menuCtrl) as GeneralSelectPlateCtrl;
-                if (selectPlate == null) return;
+                if (selectPlate == null)
+                    return;
 
                 bool isActive = selectPlate.body_active;
                 int cursorNo = selectPlate.cursor_no;
@@ -295,20 +340,29 @@ namespace AccessibilityMod.Core
             catch { }
         }
 
-        private string GetGeneralSelectPlateOptionText(GeneralSelectPlateCtrl selectPlate, int index)
+        private string GetGeneralSelectPlateOptionText(
+            GeneralSelectPlateCtrl selectPlate,
+            int index
+        )
         {
             try
             {
-                var field = typeof(GeneralSelectPlateCtrl).GetField("select_list_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (field == null) return null;
+                var field = typeof(GeneralSelectPlateCtrl).GetField(
+                    "select_list_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return null;
 
                 var selectList = field.GetValue(selectPlate) as System.Collections.IList;
-                if (selectList == null || index < 0 || index >= selectList.Count) return null;
+                if (selectList == null || index < 0 || index >= selectList.Count)
+                    return null;
 
                 var item = selectList[index];
                 var textField = item.GetType().GetField("text_");
-                if (textField == null) return null;
+                if (textField == null)
+                    return null;
 
                 var textComponent = textField.GetValue(item) as UnityEngine.UI.Text;
                 return textComponent?.text;
@@ -323,14 +377,24 @@ namespace AccessibilityMod.Core
         /// Schedules a delayed announcement. If called again before the delay expires,
         /// the previous announcement is cancelled.
         /// </summary>
-        public void ScheduleDelayedAnnouncement(float delaySeconds, Func<string> getTextFunc, TextType textType)
+        public void ScheduleDelayedAnnouncement(
+            float delaySeconds,
+            Func<string> getTextFunc,
+            TextType textType
+        )
         {
             // Cancel any pending delayed announcement
             CancelDelayedAnnouncement();
 
             _delayedAnnouncementId++;
             _delayedAnnouncementCoroutine = StartCoroutine(
-                DelayedAnnouncementCoroutine(delaySeconds, getTextFunc, textType, _delayedAnnouncementId));
+                DelayedAnnouncementCoroutine(
+                    delaySeconds,
+                    getTextFunc,
+                    textType,
+                    _delayedAnnouncementId
+                )
+            );
         }
 
         /// <summary>
@@ -346,7 +410,12 @@ namespace AccessibilityMod.Core
             _delayedAnnouncementId++;
         }
 
-        private IEnumerator DelayedAnnouncementCoroutine(float delaySeconds, Func<string> getTextFunc, TextType textType, int announcementId)
+        private IEnumerator DelayedAnnouncementCoroutine(
+            float delaySeconds,
+            Func<string> getTextFunc,
+            TextType textType,
+            int announcementId
+        )
         {
             yield return new WaitForSeconds(delaySeconds);
 

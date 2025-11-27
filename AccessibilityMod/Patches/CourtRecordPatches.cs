@@ -1,7 +1,7 @@
 using System;
 using System.Text;
-using HarmonyLib;
 using AccessibilityMod.Core;
+using HarmonyLib;
 
 namespace AccessibilityMod.Patches
 {
@@ -40,7 +40,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in NoteOpen patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in NoteOpen patch: {ex.Message}"
+                );
             }
         }
 
@@ -63,7 +65,10 @@ namespace AccessibilityMod.Patches
                     string tabName = recordType == 0 ? "Evidence" : "Profiles";
 
                     int itemCount = 0;
-                    if (__instance.record_data_ != null && recordType < __instance.record_data_.Count)
+                    if (
+                        __instance.record_data_ != null
+                        && recordType < __instance.record_data_.Count
+                    )
                     {
                         itemCount = __instance.record_data_[recordType].cursor_num_;
                     }
@@ -77,7 +82,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in ChangeRecord patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in ChangeRecord patch: {ex.Message}"
+                );
             }
         }
 
@@ -101,7 +108,8 @@ namespace AccessibilityMod.Patches
 
                 // Get current pice data
                 piceData currentItem = __instance.current_pice_;
-                if (currentItem == null) return;
+                if (currentItem == null)
+                    return;
 
                 // Build announcement with name and description
                 StringBuilder sb = new StringBuilder();
@@ -135,7 +143,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in CursorRecord patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in CursorRecord patch: {ex.Message}"
+                );
             }
         }
 
@@ -172,7 +182,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in RecordPageChange patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in RecordPageChange patch: {ex.Message}"
+                );
             }
         }
 
@@ -180,8 +192,11 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                var field = typeof(recordListCtrl).GetField("page_cnt_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var field = typeof(recordListCtrl).GetField(
+                    "page_cnt_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
                 if (field != null)
                 {
                     return (int)field.GetValue(instance);
@@ -204,17 +219,21 @@ namespace AccessibilityMod.Patches
             {
                 // Get the current item from the record list
                 var recordList = recordListCtrl.instance;
-                if (recordList == null) return;
+                if (recordList == null)
+                    return;
 
                 piceData currentItem = recordList.current_pice_;
-                if (currentItem == null) return;
+                if (currentItem == null)
+                    return;
 
                 string message = $"Viewing details: {currentItem.name}. Press B to close.";
                 ClipboardManager.Announce(message, TextType.Menu);
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in ViewDetail patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in ViewDetail patch: {ex.Message}"
+                );
             }
         }
 

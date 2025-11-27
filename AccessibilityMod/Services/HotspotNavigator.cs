@@ -37,7 +37,9 @@ namespace AccessibilityMod.Services
             {
                 if (GSStatic.inspect_data_ == null)
                 {
-                    AccessibilityMod.Core.AccessibilityMod.Logger?.Msg("No inspection data available");
+                    AccessibilityMod.Core.AccessibilityMod.Logger?.Msg(
+                        "No inspection data available"
+                    );
                     return;
                 }
 
@@ -69,22 +71,21 @@ namespace AccessibilityMod.Services
                     // Generate position description
                     string posDesc = GetPositionDescription(centerX, centerY);
 
-                    _hotspots.Add(new HotspotInfo
-                    {
-                        MessageId = data.message,
-                        DataIndex = i,
-                        CenterX = centerX,
-                        CenterY = centerY,
-                        IsExamined = examined,
-                        Description = $"Point {i + 1} ({posDesc})"
-                    });
+                    _hotspots.Add(
+                        new HotspotInfo
+                        {
+                            MessageId = data.message,
+                            DataIndex = i,
+                            CenterX = centerX,
+                            CenterY = centerY,
+                            IsExamined = examined,
+                            Description = $"Point {i + 1} ({posDesc})",
+                        }
+                    );
                 }
 
                 // Sort by position: top-to-bottom, then left-to-right
-                _hotspots = _hotspots
-                    .OrderBy(h => h.CenterY)
-                    .ThenBy(h => h.CenterX)
-                    .ToList();
+                _hotspots = _hotspots.OrderBy(h => h.CenterY).ThenBy(h => h.CenterX).ToList();
 
                 // Reassign descriptions after sorting
                 for (int i = 0; i < _hotspots.Count; i++)
@@ -94,19 +95,29 @@ namespace AccessibilityMod.Services
                     h.Description = $"Point {i + 1} ({posDesc})";
                 }
 
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Msg($"Found {_hotspots.Count} hotspots");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Msg(
+                    $"Found {_hotspots.Count} hotspots"
+                );
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error refreshing hotspots: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error refreshing hotspots: {ex.Message}"
+                );
             }
         }
 
         private static string GetPositionDescription(float x, float y)
         {
             // Assuming 1920x1080 resolution
-            string horizontal = x < 640 ? "left" : x > 1280 ? "right" : "center";
-            string vertical = y < 360 ? "top" : y > 720 ? "bottom" : "middle";
+            string horizontal =
+                x < 640 ? "left"
+                : x > 1280 ? "right"
+                : "center";
+            string vertical =
+                y < 360 ? "top"
+                : y > 720 ? "bottom"
+                : "middle";
             return $"{vertical} {horizontal}";
         }
 
@@ -227,7 +238,8 @@ namespace AccessibilityMod.Services
             int examined = _hotspots.Count(h => h.IsExamined);
             int unexamined = _hotspots.Count - examined;
 
-            string summary = $"{_hotspots.Count} points of interest. {examined} examined, {unexamined} remaining.";
+            string summary =
+                $"{_hotspots.Count} points of interest. {examined} examined, {unexamined} remaining.";
 
             // List unexamined ones
             var unexaminedList = _hotspots.Where(h => !h.IsExamined).ToList();
@@ -273,11 +285,15 @@ namespace AccessibilityMod.Services
                     inspectCtrl.instance.pos_y_ = screenY;
 
                     // Update the cursor visual position using reflection (cursor_ is private)
-                    var cursorField = typeof(inspectCtrl).GetField("cursor_",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var cursorField = typeof(inspectCtrl).GetField(
+                        "cursor_",
+                        System.Reflection.BindingFlags.NonPublic
+                            | System.Reflection.BindingFlags.Instance
+                    );
                     if (cursorField != null)
                     {
-                        var cursor = cursorField.GetValue(inspectCtrl.instance) as AssetBundleSprite;
+                        var cursor =
+                            cursorField.GetValue(inspectCtrl.instance) as AssetBundleSprite;
                         if (cursor != null)
                         {
                             cursor.transform.localPosition = new Vector3(screenX, screenY, -1f);
@@ -287,7 +303,9 @@ namespace AccessibilityMod.Services
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error moving cursor: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error moving cursor: {ex.Message}"
+                );
             }
         }
 
@@ -323,7 +341,10 @@ namespace AccessibilityMod.Services
             }
             else
             {
-                ClipboardManager.Announce("Investigation mode. No points of interest found.", TextType.Investigation);
+                ClipboardManager.Announce(
+                    "Investigation mode. No points of interest found.",
+                    TextType.Investigation
+                );
             }
         }
     }

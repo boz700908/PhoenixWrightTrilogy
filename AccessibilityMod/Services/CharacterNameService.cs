@@ -18,7 +18,7 @@ namespace AccessibilityMod.Services
             { 2, "Phoenix Wright" },
             { 3, "Mia Fey" },
             { 5, "Larry Butz" },
-            { 7, "Mia Fey" },       // Alternative index
+            { 7, "Mia Fey" }, // Alternative index
             { 9, "Judge" },
             { 10, "Winston Payne" },
             { 11, "Frank Sahwit" },
@@ -32,7 +32,7 @@ namespace AccessibilityMod.Services
             { 21, "Miles Edgeworth" },
             { 23, "Lotta Hart" },
             { 24, "Sal Manella" },
-            { 25, "Larry Butz" },   // Alternative index
+            { 25, "Larry Butz" }, // Alternative index
             { 26, "Will Powers" },
             { 27, "Wendy Oldbag" },
             { 28, "Penny Nichols" },
@@ -103,7 +103,7 @@ namespace AccessibilityMod.Services
             { 3, "Miles Edgeworth" },
             { 4, "Dick Gumshoe" },
             { 5, "Larry Butz" },
-            { 6, "Phoenix Wright" },  // Young Phoenix
+            { 6, "Phoenix Wright" }, // Young Phoenix
             { 7, "Pearl Fey" },
             { 8, "Franziska von Karma" },
             { 9, "Judge" },
@@ -222,7 +222,9 @@ namespace AccessibilityMod.Services
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Warning($"Error getting character name for ID {spriteId}: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Warning(
+                    $"Error getting character name for ID {spriteId}: {ex.Message}"
+                );
             }
 
             return "";

@@ -14,7 +14,7 @@ namespace AccessibilityMod.Services
             Dialogue,
             Menu,
             Gallery,
-            Options
+            Options,
         }
 
         public static GameMode CurrentMode { get; private set; } = GameMode.Unknown;
@@ -78,7 +78,8 @@ namespace AccessibilityMod.Services
                     int unexaminedCount = HotspotNavigator.GetUnexaminedCount();
                     if (hotspotCount > 0)
                     {
-                        stateInfo += $". {hotspotCount} points of interest, {unexaminedCount} unexamined";
+                        stateInfo +=
+                            $". {hotspotCount} points of interest, {unexaminedCount} unexamined";
                     }
                 }
                 else if (IsInTrialMode())
@@ -99,8 +100,13 @@ namespace AccessibilityMod.Services
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error announcing state: {ex.Message}");
-                ClipboardManager.Announce("Unable to determine current state", TextType.SystemMessage);
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error announcing state: {ex.Message}"
+                );
+                ClipboardManager.Announce(
+                    "Unable to determine current state",
+                    TextType.SystemMessage
+                );
             }
         }
 
@@ -140,7 +146,9 @@ namespace AccessibilityMod.Services
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error getting life gauge: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error getting life gauge: {ex.Message}"
+                );
             }
         }
     }

@@ -1,7 +1,7 @@
 using System;
-using HarmonyLib;
 using AccessibilityMod.Core;
 using AccessibilityMod.Services;
+using HarmonyLib;
 
 namespace AccessibilityMod.Patches
 {
@@ -26,7 +26,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Investigation Play patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Investigation Play patch: {ex.Message}"
+                );
             }
         }
 
@@ -45,7 +47,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Investigation End patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Investigation End patch: {ex.Message}"
+                );
             }
         }
 
@@ -86,7 +90,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Set_InspectCursor patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Set_InspectCursor patch: {ex.Message}"
+                );
             }
         }
 
@@ -95,8 +101,11 @@ namespace AccessibilityMod.Patches
             try
             {
                 // Access the private cursor_ field to get its sprite number
-                var cursorField = typeof(inspectCtrl).GetField("cursor_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var cursorField = typeof(inspectCtrl).GetField(
+                    "cursor_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
 
                 if (cursorField != null)
                 {
@@ -134,7 +143,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Move Setting patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Move Setting patch: {ex.Message}"
+                );
             }
         }
 
@@ -146,8 +157,11 @@ namespace AccessibilityMod.Patches
             try
             {
                 // Get cursor_no_ via reflection
-                var cursorNoField = typeof(moveCtrl).GetField("cursor_no_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var cursorNoField = typeof(moveCtrl).GetField(
+                    "cursor_no_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
 
                 if (cursorNoField == null)
                     return;
@@ -165,7 +179,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Move Thumbnail patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Move Thumbnail patch: {ex.Message}"
+                );
             }
         }
 
@@ -174,8 +190,11 @@ namespace AccessibilityMod.Patches
             try
             {
                 // Access select_list to get location name
-                var selectListField = typeof(moveCtrl).GetField("select_list_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                var selectListField = typeof(moveCtrl).GetField(
+                    "select_list_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
 
                 if (selectListField != null)
                 {

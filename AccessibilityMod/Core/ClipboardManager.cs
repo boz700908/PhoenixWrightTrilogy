@@ -30,8 +30,10 @@ namespace AccessibilityMod.Core
                 return;
 
             DateTime now = DateTime.UtcNow;
-            if (text == _lastEnqueuedMessage
-                && (now - _lastEnqueueTime).TotalSeconds < DuplicateWindowSeconds)
+            if (
+                text == _lastEnqueuedMessage
+                && (now - _lastEnqueueTime).TotalSeconds < DuplicateWindowSeconds
+            )
             {
                 return;
             }
@@ -60,7 +62,11 @@ namespace AccessibilityMod.Core
             }
         }
 
-        public static void Output(string speaker, string text, TextType textType = TextType.Dialogue)
+        public static void Output(
+            string speaker,
+            string text,
+            TextType textType = TextType.Dialogue
+        )
         {
             if (Net35Extensions.IsNullOrWhiteSpace(text))
                 return;
@@ -113,6 +119,6 @@ namespace AccessibilityMod.Core
         Evidence,
         SystemMessage,
         Trial,
-        PsycheLock
+        PsycheLock,
     }
 }

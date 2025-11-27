@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using HarmonyLib;
 using AccessibilityMod.Core;
 using AccessibilityMod.Services;
+using HarmonyLib;
 
 namespace AccessibilityMod.Patches
 {
@@ -22,20 +22,29 @@ namespace AccessibilityMod.Patches
         // Main title menu initialization - announce when main menu appears
         [HarmonyPostfix]
         [HarmonyPatch(typeof(titleSelectPlate), "playCursor")]
-        public static void TitleSelectPlate_PlayCursor_Postfix(titleSelectPlate __instance, int in_type)
+        public static void TitleSelectPlate_PlayCursor_Postfix(
+            titleSelectPlate __instance,
+            int in_type
+        )
         {
             try
             {
                 // Check if this is the main menu (from mainTitleCtrl)
                 var mainTitle = mainTitleCtrl.instance;
-                if (mainTitle == null) return;
+                if (mainTitle == null)
+                    return;
 
-                var field = typeof(mainTitleCtrl).GetField("select_plate_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (field == null) return;
+                var field = typeof(mainTitleCtrl).GetField(
+                    "select_plate_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return;
 
                 var selectPlate = field.GetValue(mainTitle) as titleSelectPlate;
-                if (selectPlate != __instance) return;
+                if (selectPlate != __instance)
+                    return;
 
                 // Get the menu options and announce
                 string optionText = GetMainMenuOptionText(mainTitle, __instance.cursor_no);
@@ -47,7 +56,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in TitleSelectPlate_PlayCursor patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in TitleSelectPlate_PlayCursor patch: {ex.Message}"
+                );
             }
         }
 
@@ -55,22 +66,33 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                var field = typeof(mainTitleCtrl).GetField("select_text_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (field == null) return null;
+                var field = typeof(mainTitleCtrl).GetField(
+                    "select_text_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return null;
 
                 var selectText = field.GetValue(mainTitle) as titleSelectPlate.ButtonParam[][];
-                if (selectText == null) return null;
+                if (selectText == null)
+                    return null;
 
-                var typeField = typeof(mainTitleCtrl).GetField("select_type_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (typeField == null) return null;
+                var typeField = typeof(mainTitleCtrl).GetField(
+                    "select_type_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (typeField == null)
+                    return null;
 
                 int selectType = (int)typeField.GetValue(mainTitle);
-                if (selectType < 0 || selectType >= selectText.Length) return null;
+                if (selectType < 0 || selectType >= selectText.Length)
+                    return null;
 
                 var options = selectText[selectType];
-                if (options == null || index < 0 || index >= options.Length) return null;
+                if (options == null || index < 0 || index >= options.Length)
+                    return null;
 
                 return options[index].message_;
             }
@@ -84,19 +106,29 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                var field = typeof(mainTitleCtrl).GetField("select_text_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (field == null) return 0;
+                var field = typeof(mainTitleCtrl).GetField(
+                    "select_text_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return 0;
 
                 var selectText = field.GetValue(mainTitle) as titleSelectPlate.ButtonParam[][];
-                if (selectText == null) return 0;
+                if (selectText == null)
+                    return 0;
 
-                var typeField = typeof(mainTitleCtrl).GetField("select_type_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (typeField == null) return 0;
+                var typeField = typeof(mainTitleCtrl).GetField(
+                    "select_type_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (typeField == null)
+                    return 0;
 
                 int selectType = (int)typeField.GetValue(mainTitle);
-                if (selectType < 0 || selectType >= selectText.Length) return 0;
+                if (selectType < 0 || selectType >= selectText.Length)
+                    return 0;
 
                 return selectText[selectType]?.Length ?? 0;
             }
@@ -118,24 +150,31 @@ namespace AccessibilityMod.Patches
             try
             {
                 _lastSeriesTitle = -1;
-                string message = "Select game. Use left and right to choose game, then select Play Title or Select Episode.";
+                string message =
+                    "Select game. Use left and right to choose game, then select Play Title or Select Episode.";
                 ClipboardManager.Announce(message, TextType.Menu);
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in SeriesSelect_Play patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in SeriesSelect_Play patch: {ex.Message}"
+                );
             }
         }
 
         // Series title change - announce when changing between GS1, GS2, GS3
         [HarmonyPostfix]
         [HarmonyPatch(typeof(seriesTitleSelectCtrl), "changeTitle")]
-        public static void SeriesSelect_ChangeTitle_Postfix(seriesTitleSelectCtrl __instance, TitleId title_id)
+        public static void SeriesSelect_ChangeTitle_Postfix(
+            seriesTitleSelectCtrl __instance,
+            TitleId title_id
+        )
         {
             try
             {
                 int titleIndex = (int)title_id;
-                if (titleIndex == _lastSeriesTitle) return;
+                if (titleIndex == _lastSeriesTitle)
+                    return;
 
                 _lastSeriesTitle = titleIndex;
                 string titleName = GetGameTitleName(title_id);
@@ -143,7 +182,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in SeriesSelect_ChangeTitle patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in SeriesSelect_ChangeTitle patch: {ex.Message}"
+                );
             }
         }
 
@@ -151,10 +192,14 @@ namespace AccessibilityMod.Patches
         {
             switch (titleId)
             {
-                case TitleId.GS1: return "Phoenix Wright: Ace Attorney";
-                case TitleId.GS2: return "Phoenix Wright: Ace Attorney - Justice for All";
-                case TitleId.GS3: return "Phoenix Wright: Ace Attorney - Trials and Tribulations";
-                default: return $"Game {(int)titleId + 1}";
+                case TitleId.GS1:
+                    return "Phoenix Wright: Ace Attorney";
+                case TitleId.GS2:
+                    return "Phoenix Wright: Ace Attorney - Justice for All";
+                case TitleId.GS3:
+                    return "Phoenix Wright: Ace Attorney - Trials and Tribulations";
+                default:
+                    return $"Game {(int)titleId + 1}";
             }
         }
 
@@ -169,36 +214,51 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                string message = "Chapter selection. Use left and right to choose episode, up and down to choose chapter.";
+                string message =
+                    "Chapter selection. Use left and right to choose episode, up and down to choose chapter.";
                 ClipboardManager.Announce(message, TextType.Menu);
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in ChapterJump_Play patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in ChapterJump_Play patch: {ex.Message}"
+                );
             }
         }
 
         // Chapter jump episode change - announce episode name
         [HarmonyPostfix]
         [HarmonyPatch(typeof(ChapterJumpInMenuCtrl), "EpisodeDispRefresh")]
-        public static void ChapterJump_EpisodeRefresh_Postfix(ChapterJumpInMenuCtrl __instance, int position)
+        public static void ChapterJump_EpisodeRefresh_Postfix(
+            ChapterJumpInMenuCtrl __instance,
+            int position
+        )
         {
             try
             {
                 // Get episode cursor from instance
-                var nameTableField = typeof(ChapterJumpInMenuCtrl).GetField("name_table",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (nameTableField == null) return;
+                var nameTableField = typeof(ChapterJumpInMenuCtrl).GetField(
+                    "name_table",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (nameTableField == null)
+                    return;
 
-                var nameTable = nameTableField.GetValue(__instance) as System.Collections.Generic.List<System.Collections.Generic.List<string>>;
-                if (nameTable == null || position < 0 || position >= nameTable.Count) return;
+                var nameTable =
+                    nameTableField.GetValue(__instance)
+                    as System.Collections.Generic.List<System.Collections.Generic.List<string>>;
+                if (nameTable == null || position < 0 || position >= nameTable.Count)
+                    return;
 
                 string episodeName = $"Episode {position + 1}";
                 ClipboardManager.Announce(episodeName, TextType.Menu);
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in ChapterJump_EpisodeRefresh patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in ChapterJump_EpisodeRefresh patch: {ex.Message}"
+                );
             }
         }
 
@@ -218,24 +278,35 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in GeneralSelectPlate_PlayCursor patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in GeneralSelectPlate_PlayCursor patch: {ex.Message}"
+                );
             }
         }
 
-        private static string GetGeneralSelectOptionText(GeneralSelectPlateCtrl selectPlate, int index)
+        private static string GetGeneralSelectOptionText(
+            GeneralSelectPlateCtrl selectPlate,
+            int index
+        )
         {
             try
             {
-                var field = typeof(GeneralSelectPlateCtrl).GetField("select_list_",
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (field == null) return null;
+                var field = typeof(GeneralSelectPlateCtrl).GetField(
+                    "select_list_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return null;
 
                 var selectList = field.GetValue(selectPlate) as System.Collections.IList;
-                if (selectList == null || index < 0 || index >= selectList.Count) return null;
+                if (selectList == null || index < 0 || index >= selectList.Count)
+                    return null;
 
                 var item = selectList[index];
                 var textField = item.GetType().GetField("text_");
-                if (textField == null) return null;
+                if (textField == null)
+                    return null;
 
                 var textComponent = textField.GetValue(item) as UnityEngine.UI.Text;
                 return textComponent?.text;
@@ -273,7 +344,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in SetMenu patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in SetMenu patch: {ex.Message}"
+                );
             }
         }
 
@@ -293,7 +366,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in Cursor patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in Cursor patch: {ex.Message}"
+                );
             }
         }
 
@@ -333,7 +408,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in SetText patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in SetText patch: {ex.Message}"
+                );
             }
         }
 
@@ -359,7 +436,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in PlayCursor patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in PlayCursor patch: {ex.Message}"
+                );
             }
         }
 
@@ -385,7 +464,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in SetCursorNo patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in SetCursorNo patch: {ex.Message}"
+                );
             }
         }
 
@@ -401,7 +482,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in End patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in End patch: {ex.Message}"
+                );
             }
         }
 

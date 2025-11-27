@@ -1,7 +1,7 @@
 using System;
-using HarmonyLib;
 using AccessibilityMod.Core;
 using AccessibilityMod.Services;
+using HarmonyLib;
 
 namespace AccessibilityMod.Patches
 {
@@ -13,7 +13,10 @@ namespace AccessibilityMod.Patches
         // Hook life gauge state changes
         [HarmonyPostfix]
         [HarmonyPatch(typeof(lifeGaugeCtrl), "ActionLifeGauge")]
-        public static void ActionLifeGauge_Postfix(lifeGaugeCtrl __instance, lifeGaugeCtrl.Gauge_State _state)
+        public static void ActionLifeGauge_Postfix(
+            lifeGaugeCtrl __instance,
+            lifeGaugeCtrl.Gauge_State _state
+        )
         {
             try
             {
@@ -39,7 +42,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error in LifeGauge ActionLifeGauge patch: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in LifeGauge ActionLifeGauge patch: {ex.Message}"
+                );
             }
         }
 
@@ -89,7 +94,9 @@ namespace AccessibilityMod.Patches
             }
             catch (Exception ex)
             {
-                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error announcing health: {ex.Message}");
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error announcing health: {ex.Message}"
+                );
             }
         }
     }
