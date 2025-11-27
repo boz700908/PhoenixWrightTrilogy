@@ -11,6 +11,101 @@ namespace AccessibilityMod.Patches
     public static class SaveLoadPatches
     {
         private static int _lastSlotCursor = -1;
+        private static int _lastSaveOptionCursor = -1;
+
+        // Hook optionSave cursor changes (Save/Load selection in Options menu)
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(optionSave), "ChangeValue")]
+        public static void OptionSave_ChangeValue_Postfix(optionSave __instance)
+        {
+            try
+            {
+                int cursorNum = GetOptionSaveCursor(__instance);
+                if (cursorNum != _lastSaveOptionCursor && cursorNum >= 0)
+                {
+                    _lastSaveOptionCursor = cursorNum;
+                    string optionText = GetOptionSaveText(__instance, cursorNum);
+                    if (!Net35Extensions.IsNullOrWhiteSpace(optionText))
+                    {
+                        ClipboardManager.Announce(optionText, TextType.Menu);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in OptionSave ChangeValue patch: {ex.Message}"
+                );
+            }
+        }
+
+        // Also announce when first entering the Save/Load option
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(optionSave), "SelectEntry")]
+        public static void OptionSave_SelectEntry_Postfix(optionSave __instance)
+        {
+            try
+            {
+                _lastSaveOptionCursor = 0; // Reset to Save (index 0)
+                string optionText = GetOptionSaveText(__instance, 0);
+                if (!Net35Extensions.IsNullOrWhiteSpace(optionText))
+                {
+                    ClipboardManager.Announce(optionText, TextType.Menu);
+                }
+            }
+            catch (Exception ex)
+            {
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in OptionSave SelectEntry patch: {ex.Message}"
+                );
+            }
+        }
+
+        private static int GetOptionSaveCursor(optionSave instance)
+        {
+            try
+            {
+                var field = typeof(optionSave).GetField(
+                    "cursor_num_",
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
+                if (field != null)
+                {
+                    return (int)field.GetValue(instance);
+                }
+            }
+            catch { }
+            return -1;
+        }
+
+        private static string GetOptionSaveText(optionSave instance, int cursorNum)
+        {
+            try
+            {
+                var field = typeof(optionSave).GetField(
+                    "select_plate_",
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
+                if (field == null)
+                    return null;
+
+                var selectPlate = field.GetValue(instance) as System.Collections.IList;
+                if (selectPlate == null || cursorNum < 0 || cursorNum >= selectPlate.Count)
+                    return null;
+
+                var item = selectPlate[cursorNum];
+                var textField = item.GetType().GetField("text_");
+                if (textField == null)
+                    return null;
+
+                var textComponent = textField.GetValue(item) as Text;
+                return textComponent?.text;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         // Hook when save/load UI opens
         [HarmonyPostfix]
@@ -77,10 +172,17 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                // Simple slot announcement - slot number (1-10)
-                string slotInfo = $"Slot {slotNo + 1}";
+                // Check if slot has data
+                bool hasData = GSStatic.save_data[slotNo].in_data > 0;
 
-                // Try to get more info via reflection if available
+                if (!hasData)
+                {
+                    ClipboardManager.Announce($"Slot {slotNo + 1}: No Data", TextType.Menu);
+                    return;
+                }
+
+                // Try to get detailed save data via reflection
+                string slotInfo = $"Slot {slotNo + 1}";
                 try
                 {
                     var slotListField = typeof(SaveLoadUICtrl).GetField(
@@ -91,24 +193,73 @@ namespace AccessibilityMod.Patches
 
                     if (slotListField != null)
                     {
-                        var slotList = slotListField.GetValue(ctrl) as System.Collections.IList;
-                        if (slotList != null && slotNo >= 0 && slotNo < slotList.Count)
+                        var slotArray = slotListField.GetValue(ctrl) as SaveSlot[];
+                        if (slotArray != null && slotNo >= 0 && slotNo < slotArray.Length)
                         {
-                            var slot = slotList[slotNo];
-                            // Try to get slot text or status
-                            var textField = slot.GetType().GetField("text_");
-                            if (textField != null)
+                            var saveSlot = slotArray[slotNo];
+
+                            // Access the slot_ property which contains the display data
+                            var slotData = saveSlot.slot;
+                            if (slotData != null)
                             {
-                                var text = textField.GetValue(slot) as UnityEngine.UI.Text;
-                                if (text != null && !string.IsNullOrEmpty(text.text))
+                                // Build comprehensive announcement
+                                var parts = new System.Collections.Generic.List<string>();
+                                parts.Add($"Slot {slotNo + 1}");
+
+                                // Get time/date
+                                if (
+                                    slotData.time_ != null
+                                    && !string.IsNullOrEmpty(slotData.time_.text)
+                                )
                                 {
-                                    slotInfo = $"Slot {slotNo + 1}: {text.text}";
+                                    // Remove newlines from date/time (game stores as "date\ntime")
+                                    string timeText = slotData.time_.text.Replace("\n", " ");
+                                    parts.Add(timeText);
                                 }
+
+                                // Get game title
+                                if (
+                                    slotData.title_ != null
+                                    && !string.IsNullOrEmpty(slotData.title_.text)
+                                )
+                                {
+                                    parts.Add(slotData.title_.text);
+                                }
+
+                                // Get scenario/episode
+                                if (
+                                    slotData.scenario_ != null
+                                    && !string.IsNullOrEmpty(slotData.scenario_.text)
+                                )
+                                {
+                                    // Replace full-width space with regular space
+                                    string scenarioText = slotData.scenario_.text.Replace(
+                                        "\u3000",
+                                        " "
+                                    );
+                                    parts.Add(scenarioText);
+                                }
+
+                                // Get progress/day
+                                if (
+                                    slotData.progress != null
+                                    && !string.IsNullOrEmpty(slotData.progress.text)
+                                )
+                                {
+                                    parts.Add(slotData.progress.text);
+                                }
+
+                                slotInfo = string.Join(", ", parts.ToArray());
                             }
                         }
                     }
                 }
-                catch { }
+                catch (Exception innerEx)
+                {
+                    AccessibilityMod.Core.AccessibilityMod.Logger?.Warning(
+                        $"Could not read detailed slot data: {innerEx.Message}"
+                    );
+                }
 
                 ClipboardManager.Announce(slotInfo, TextType.Menu);
             }

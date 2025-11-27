@@ -11,6 +11,7 @@ namespace AccessibilityMod.Patches
     {
         private static int _lastTanteiCursor = -1;
         private static int _lastSelectCursor = -1;
+        private static int _lastTitleSelectCursor = -1;
         private static string[] _tanteiMenuOptions = new string[4];
         private static List<string> _selectOptions = new List<string>();
 
@@ -95,6 +96,69 @@ namespace AccessibilityMod.Patches
                     return null;
 
                 return options[index].message_;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // Generic titleSelectPlate cursor navigation - announces selection text when cursor moves
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(titleSelectPlate), "updateCursorPosition")]
+        public static void TitleSelectPlate_UpdateCursorPosition_Postfix(
+            titleSelectPlate __instance,
+            int idx
+        )
+        {
+            try
+            {
+                // Skip if cursor hasn't changed
+                if (idx == _lastTitleSelectCursor)
+                    return;
+
+                _lastTitleSelectCursor = idx;
+
+                // Get the button text at the current cursor position
+                string optionText = GetTitleSelectPlateText(__instance, idx);
+                if (!Core.Net35Extensions.IsNullOrWhiteSpace(optionText))
+                {
+                    ClipboardManager.Announce(optionText, TextType.Menu);
+                }
+            }
+            catch (Exception ex)
+            {
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in TitleSelectPlate_UpdateCursorPosition patch: {ex.Message}"
+                );
+            }
+        }
+
+        private static string GetTitleSelectPlateText(titleSelectPlate instance, int idx)
+        {
+            try
+            {
+                var field = typeof(titleSelectPlate).GetField(
+                    "select_list_",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                );
+                if (field == null)
+                    return null;
+
+                var selectList = field.GetValue(instance) as System.Collections.IList;
+                if (selectList == null || idx < 0 || idx >= selectList.Count)
+                    return null;
+
+                var item = selectList[idx];
+
+                // Get the text_ field from the SelectPlate item
+                var textField = item.GetType().GetField("text_");
+                if (textField == null)
+                    return null;
+
+                var textComponent = textField.GetValue(item) as UnityEngine.UI.Text;
+                return textComponent?.text;
             }
             catch
             {
