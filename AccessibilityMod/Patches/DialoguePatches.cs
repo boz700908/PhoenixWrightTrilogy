@@ -1,6 +1,8 @@
 using System;
 using System.Text;
+using System.Text.RegularExpressions;
 using HarmonyLib;
+using UnityEngine;
 using AccessibilityMod.Core;
 using AccessibilityMod.Services;
 
@@ -11,6 +13,9 @@ namespace AccessibilityMod.Patches
     {
         private static string _lastAnnouncedText = "";
         private static int _lastSpeakerId = -1;
+
+        // Regex for detecting button placeholders (multiple spaces or full-width spaces)
+        private static readonly Regex SpacePlaceholderRegex = new Regex(@"[\u3000]+| {3,}", RegexOptions.Compiled);
 
         // Hook when arrow appears - this means the text is ready to be read
         [HarmonyPostfix]
@@ -104,6 +109,9 @@ namespace AccessibilityMod.Patches
 
                 _lastAnnouncedText = text;
 
+                // Replace button placeholders with actual key names
+                text = ReplaceButtonPlaceholders(ctrl, text);
+
                 // Get speaker name
                 string speakerName = "";
                 if (_lastSpeakerId > 0)
@@ -129,6 +137,128 @@ namespace AccessibilityMod.Patches
             catch (Exception ex)
             {
                 AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error outputting dialogue: {ex.Message}");
+            }
+        }
+
+        private static string ReplaceButtonPlaceholders(messageBoardCtrl ctrl, string text)
+        {
+            try
+            {
+                // Check if text contains placeholder patterns
+                if (!SpacePlaceholderRegex.IsMatch(text))
+                    return text;
+
+                // Get the key icon from the message board
+                var keyIcon = ctrl.msg_key_icon;
+                if (keyIcon == null || keyIcon.key_icon == null)
+                    return text;
+
+                // Find the first active key icon and get its key type
+                KeyType activeKeyType = KeyType.None;
+                foreach (var icon in keyIcon.key_icon)
+                {
+                    if (icon != null && icon.icon_active_)
+                    {
+                        activeKeyType = icon.icon_key_type_;
+                        break;
+                    }
+                }
+
+                // Get the key name
+                string keyName = null;
+                if (activeKeyType != KeyType.None)
+                {
+                    keyName = GetKeyName(activeKeyType);
+                }
+
+                // Replace the placeholder
+                if (!string.IsNullOrEmpty(keyName))
+                {
+                    text = SpacePlaceholderRegex.Replace(text, $" [{keyName}] ");
+                }
+
+                return text;
+            }
+            catch (Exception ex)
+            {
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error($"Error replacing button placeholders: {ex.Message}");
+                return text;
+            }
+        }
+
+        private static string GetKeyName(KeyType keyType)
+        {
+            // Check if using controller or keyboard
+            bool isController = keyGuideBase.keyguid_pad_;
+
+            if (isController)
+            {
+                // Controller button names (Xbox style)
+                switch (keyType)
+                {
+                    case KeyType.A: return "A";
+                    case KeyType.B: return "B";
+                    case KeyType.X: return "X";
+                    case KeyType.Y: return "Y";
+                    case KeyType.L: return "LB";
+                    case KeyType.R: return "RB";
+                    case KeyType.ZL: return "LT";
+                    case KeyType.ZR: return "RT";
+                    case KeyType.Start: return "Menu";
+                    case KeyType.Select: return "View";
+                    case KeyType.StickL: return "Left Stick";
+                    case KeyType.StickR: return "Right Stick";
+                    case KeyType.Record: return "RB";
+                    default: return keyType.ToString();
+                }
+            }
+            else
+            {
+                // Get keyboard binding
+                try
+                {
+                    var keyCode = padCtrl.instance.GetKeyCode(keyType);
+                    return GetKeyCodeName(keyCode);
+                }
+                catch
+                {
+                    return keyType.ToString();
+                }
+            }
+        }
+
+        private static string GetKeyCodeName(KeyCode keyCode)
+        {
+            switch (keyCode)
+            {
+                case KeyCode.Space: return "Space";
+                case KeyCode.Return: return "Enter";
+                case KeyCode.Escape: return "Escape";
+                case KeyCode.Tab: return "Tab";
+                case KeyCode.Backspace: return "Backspace";
+                case KeyCode.Delete: return "Delete";
+                case KeyCode.Insert: return "Insert";
+                case KeyCode.Home: return "Home";
+                case KeyCode.End: return "End";
+                case KeyCode.PageUp: return "Page Up";
+                case KeyCode.PageDown: return "Page Down";
+                case KeyCode.UpArrow: return "Up Arrow";
+                case KeyCode.DownArrow: return "Down Arrow";
+                case KeyCode.LeftArrow: return "Left Arrow";
+                case KeyCode.RightArrow: return "Right Arrow";
+                case KeyCode.LeftShift: return "Left Shift";
+                case KeyCode.RightShift: return "Right Shift";
+                case KeyCode.LeftControl: return "Left Ctrl";
+                case KeyCode.RightControl: return "Right Ctrl";
+                case KeyCode.LeftAlt: return "Left Alt";
+                case KeyCode.RightAlt: return "Right Alt";
+                default:
+                    string name = keyCode.ToString();
+                    if (name.StartsWith("Alpha"))
+                        return name.Substring(5);
+                    if (name.StartsWith("Keypad"))
+                        return "Numpad " + name.Substring(6);
+                    return name;
             }
         }
 
