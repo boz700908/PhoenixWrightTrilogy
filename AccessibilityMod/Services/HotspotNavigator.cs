@@ -204,7 +204,7 @@ namespace AccessibilityMod.Services
 
             var hotspot = _hotspots[_currentIndex];
             string status = hotspot.IsExamined ? " (examined)" : "";
-            string message = $"{hotspot.Description}{status} - {_currentIndex + 1} of {_hotspots.Count}";
+            string message = $"{hotspot.Description}{status}";
 
             ClipboardManager.Announce(message, TextType.Investigation);
         }

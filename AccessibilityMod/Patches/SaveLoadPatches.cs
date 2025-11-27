@@ -180,13 +180,12 @@ namespace AccessibilityMod.Patches
                 var currentOption = options[currentIndex];
                 string optionName = GetOptionName(currentOption);
                 string currentValue = GetOptionValue(currentOption);
-                int totalCount = options.Count;
 
                 string message;
                 if (!Net35Extensions.IsNullOrWhiteSpace(currentValue))
-                    message = $"{optionName}: {currentValue} ({currentIndex + 1} of {totalCount})";
+                    message = $"{optionName}: {currentValue}";
                 else
-                    message = $"{optionName} ({currentIndex + 1} of {totalCount})";
+                    message = optionName;
 
                 ClipboardManager.Announce(message, TextType.Menu);
             }

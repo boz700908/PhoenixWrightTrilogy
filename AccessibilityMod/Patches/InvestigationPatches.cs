@@ -129,7 +129,7 @@ namespace AccessibilityMod.Patches
                 _lastCursorNum = in_num;
 
                 string locationName = GetLocationName(__instance, in_cursor_no);
-                string message = $"Move: {locationName} ({in_cursor_no + 1} of {in_num})";
+                string message = $"Move: {locationName}";
                 ClipboardManager.Announce(message, TextType.Menu);
             }
             catch (Exception ex)
@@ -160,10 +160,7 @@ namespace AccessibilityMod.Patches
                     _lastMoveCursor = currentCursor;
 
                     string locationName = GetLocationName(__instance, currentCursor);
-                    string message = _lastCursorNum > 1
-                        ? $"{locationName} ({currentCursor + 1} of {_lastCursorNum})"
-                        : locationName;
-                    ClipboardManager.Announce(message, TextType.Menu);
+                    ClipboardManager.Announce(locationName, TextType.Menu);
                 }
             }
             catch (Exception ex)

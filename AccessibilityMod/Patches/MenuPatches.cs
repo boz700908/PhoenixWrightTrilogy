@@ -41,8 +41,7 @@ namespace AccessibilityMod.Patches
                 string optionText = GetMainMenuOptionText(mainTitle, __instance.cursor_no);
                 if (!Core.Net35Extensions.IsNullOrWhiteSpace(optionText))
                 {
-                    int totalOptions = GetMainMenuOptionCount(mainTitle);
-                    string message = $"Main menu: {optionText} ({__instance.cursor_no + 1} of {totalOptions})";
+                    string message = $"Main menu: {optionText}";
                     ClipboardManager.Announce(message, TextType.Menu);
                 }
             }
@@ -214,15 +213,7 @@ namespace AccessibilityMod.Patches
                 string optionText = GetGeneralSelectOptionText(__instance, cursorNo);
                 if (!Core.Net35Extensions.IsNullOrWhiteSpace(optionText))
                 {
-                    // Get total count
-                    var cursorNumField = typeof(GeneralSelectPlateCtrl).GetField("cursor_num_",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    int total = cursorNumField != null ? (int)cursorNumField.GetValue(__instance) : 0;
-
-                    string message = total > 0
-                        ? $"{optionText} ({cursorNo + 1} of {total})"
-                        : optionText;
-                    ClipboardManager.Announce(message, TextType.Menu);
+                    ClipboardManager.Announce(optionText, TextType.Menu);
                 }
             }
             catch (Exception ex)
@@ -272,11 +263,10 @@ namespace AccessibilityMod.Patches
                 _tanteiMenuOptions[2] = TextDataCtrl.GetText(TextDataCtrl.CommonTextID.TALK);
                 _tanteiMenuOptions[3] = TextDataCtrl.GetText(TextDataCtrl.CommonTextID.TUKITUKE);
 
-                int optionCount = (in_type == 0) ? 2 : 4;
                 _lastTanteiCursor = __instance.cursor_no;
 
                 string currentOption = GetTanteiOption(__instance.cursor_no, in_type);
-                string message = $"Menu: {currentOption} ({__instance.cursor_no + 1} of {optionCount})";
+                string message = $"Menu: {currentOption}";
                 ClipboardManager.Announce(message, TextType.Menu);
 
                 AccessibilityState.SetMode(AccessibilityState.GameMode.Menu);
@@ -354,27 +344,15 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                string menuType = in_type == 0 ? "Choice" : "Talk";
                 _lastSelectCursor = __instance.cursor_no;
 
-                // Count active options
-                int count = 0;
-                for (int i = 0; i < _selectOptions.Count; i++)
+                if (__instance.cursor_no >= 0 && __instance.cursor_no < _selectOptions.Count)
                 {
-                    if (!Core.Net35Extensions.IsNullOrWhiteSpace(_selectOptions[i]))
-                        count++;
-                    else
-                        break;
-                }
-
-                if (count > 0)
-                {
-                    string currentOption = __instance.cursor_no < _selectOptions.Count
-                        ? _selectOptions[__instance.cursor_no]
-                        : "Unknown";
-
-                    string message = $"{menuType} menu: {count} options. {currentOption}";
-                    ClipboardManager.Announce(message, TextType.MenuChoice);
+                    string currentOption = _selectOptions[__instance.cursor_no];
+                    if (!Core.Net35Extensions.IsNullOrWhiteSpace(currentOption))
+                    {
+                        ClipboardManager.Announce(currentOption, TextType.MenuChoice);
+                    }
                 }
 
                 AccessibilityState.SetMode(AccessibilityState.GameMode.Menu);

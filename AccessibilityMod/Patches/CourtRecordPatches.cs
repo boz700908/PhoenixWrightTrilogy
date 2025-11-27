@@ -125,14 +125,6 @@ namespace AccessibilityMod.Patches
                     sb.Append(" ").Append(comment2);
                 }
 
-                // Add position info
-                int pageNum = GetPageNum(__instance);
-                int onePageMax = __instance.one_page_max;
-                int totalIndex = in_no + (pageNum * onePageMax) + 1;
-                int totalItems = __instance.record_data_[in_type].cursor_num_;
-
-                sb.Append($" ({totalIndex} of {totalItems})");
-
                 // Check if item has details available
                 if (currentItem.detail_id != 0 || currentItem.obj_id != 0)
                 {
@@ -176,14 +168,6 @@ namespace AccessibilityMod.Patches
             try
             {
                 int pageNum = GetPageNum(__instance);
-                int pageCnt = GetPageCount(__instance);
-
-                if (pageCnt > 1)
-                {
-                    string message = $"Page {pageNum + 1} of {pageCnt}";
-                    ClipboardManager.Announce(message, TextType.Menu);
-                }
-
                 _lastRecordPage = pageNum;
             }
             catch (Exception ex)
