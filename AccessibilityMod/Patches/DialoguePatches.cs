@@ -8,6 +8,14 @@ using UnityEngine;
 
 namespace AccessibilityMod.Patches
 {
+    /// <summary>
+    /// Patches for capturing and announcing dialogue text.
+    /// Uses multiple hook points for robust text capture:
+    /// - Arrow appearance (normal dialogue)
+    /// - Guide icon changes (indicates UI ready for input)
+    /// - Message board state changes
+    /// All hooks use centralized duplicate detection to prevent double announcements.
+    /// </summary>
     [HarmonyPatch]
     public static class DialoguePatches
     {
@@ -20,17 +28,32 @@ namespace AccessibilityMod.Patches
             RegexOptions.Compiled
         );
 
-        // Hook when arrow appears - this means the text is ready to be read
+        #region Arrow Hooks
+
+        /// <summary>
+        /// Hook when arrow state changes. The right arrow (type 0) appearing typically
+        /// means text is complete and waiting for player input.
+        /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(typeof(messageBoardCtrl), "arrow")]
         public static void Arrow_Postfix(messageBoardCtrl __instance, bool in_arrow, int in_type)
         {
             try
             {
-                // Right arrow (type 0) appearing means text is complete and waiting for player input
-                if (in_arrow && in_type == 0 && __instance.body_active)
+                // Only handle right arrow (type 0) when message board is active
+                if (in_type != 0 || !__instance.body_active)
+                    return;
+
+                if (in_arrow)
                 {
-                    OutputCurrentDialogue(__instance);
+                    // Normal case: arrow appearing means text is complete
+                    TryOutputDialogue();
+                }
+                else if (IsInCrossExaminationMode())
+                {
+                    // Cross-examination: on the last testimony line, the arrow is hidden
+                    // but we still need to read the dialogue.
+                    TryOutputDialogue();
                 }
             }
             catch (Exception ex)
@@ -41,7 +64,115 @@ namespace AccessibilityMod.Patches
             }
         }
 
-        // Hook when message board opens
+        #endregion
+
+        #region Guide Hooks
+
+        /// <summary>
+        /// Hook when guide icons are set. This is called when the game shows
+        /// input options (like Press/Present during cross-examination, or
+        /// normal dialogue options). This catches cases where the arrow
+        /// might not be shown.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(guideCtrl), "guideIconSet")]
+        public static void GuideIconSet_Postfix(
+            guideCtrl __instance,
+            bool in_guide,
+            guideCtrl.GuideType in_type
+        )
+        {
+            try
+            {
+                // Only process when setting active guide types that indicate text is ready
+                if (!in_guide)
+                    return;
+
+                // Only output if the game is actually waiting for input, not during text display
+                if (IsDialogueGuideType(in_type) && IsWaitingForInput())
+                {
+                    TryOutputDialogue();
+                }
+            }
+            catch (Exception ex)
+            {
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in GuideIconSet patch: {ex.Message}"
+                );
+            }
+        }
+
+        /// <summary>
+        /// Hook when guide changes via animation. This catches guide transitions
+        /// that might indicate new text is ready.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(guideCtrl), "changeGuide", new Type[] { typeof(guideCtrl.GuideType) })]
+        public static void ChangeGuide_Postfix(guideCtrl __instance, guideCtrl.GuideType in_type)
+        {
+            try
+            {
+                // Only output if the game is actually waiting for input, not during text display
+                if (IsDialogueGuideType(in_type) && IsWaitingForInput())
+                {
+                    TryOutputDialogue();
+                }
+            }
+            catch (Exception ex)
+            {
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in ChangeGuide patch: {ex.Message}"
+                );
+            }
+        }
+
+        /// <summary>
+        /// Check if this guide type indicates dialogue is ready to be read.
+        /// </summary>
+        private static bool IsDialogueGuideType(guideCtrl.GuideType guideType)
+        {
+            switch (guideType)
+            {
+                case guideCtrl.GuideType.HOUTEI: // Normal court dialogue
+                case guideCtrl.GuideType.QUESTIONING: // Cross-examination
+                case guideCtrl.GuideType.PSYLOCK: // Psyche-Lock sequences
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Check if the game is waiting for player input (text display is complete).
+        /// This prevents triggering during letter-by-letter text display.
+        /// </summary>
+        private static bool IsWaitingForInput()
+        {
+            try
+            {
+                if (GSStatic.message_work_ == null)
+                    return false;
+
+                var status = GSStatic.message_work_.status;
+
+                // RT_WAIT means the game is waiting for player to press a button
+                // LOOP means we're in cross-examination loop (also waiting for input)
+                return (status & MessageSystem.Status.RT_WAIT) != 0
+                    || (status & MessageSystem.Status.LOOP) != 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        #endregion
+
+        #region Message Board Hooks
+
+        /// <summary>
+        /// Hook when message board opens/closes. Reset tracking when closed.
+        /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(typeof(messageBoardCtrl), "board")]
         public static void Board_Postfix(messageBoardCtrl __instance, bool in_board, bool in_mes)
@@ -63,7 +194,9 @@ namespace AccessibilityMod.Patches
             }
         }
 
-        // Hook when speaker name changes
+        /// <summary>
+        /// Hook when speaker name changes. Track the current speaker ID.
+        /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(typeof(messageBoardCtrl), "name_plate")]
         public static void NamePlate_Postfix(
@@ -75,7 +208,6 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                // Debug: Log speaker ID to help identify correct mappings
                 if (in_name && in_name_no > 0)
                 {
                     AccessibilityMod.Core.AccessibilityMod.Logger?.Msg($"Speaker ID: {in_name_no}");
@@ -84,7 +216,6 @@ namespace AccessibilityMod.Patches
                 if (in_name && in_name_no != _lastSpeakerId)
                 {
                     _lastSpeakerId = in_name_no;
-                    // Don't announce name here - it will be combined with text in OutputCurrentDialogue
                 }
                 else if (!in_name)
                 {
@@ -99,7 +230,9 @@ namespace AccessibilityMod.Patches
             }
         }
 
-        // Hook LoadMsgSet for saved message restoration
+        /// <summary>
+        /// Hook LoadMsgSet for saved message restoration (loading a save).
+        /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(typeof(messageBoardCtrl), "LoadMsgSet")]
         public static void LoadMsgSet_Postfix(messageBoardCtrl __instance)
@@ -108,7 +241,7 @@ namespace AccessibilityMod.Patches
             {
                 if (__instance.body_active)
                 {
-                    OutputCurrentDialogue(__instance);
+                    TryOutputDialogue();
                 }
             }
             catch (Exception ex)
@@ -119,10 +252,43 @@ namespace AccessibilityMod.Patches
             }
         }
 
-        private static void OutputCurrentDialogue(messageBoardCtrl ctrl)
+        #endregion
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Check if we're in cross-examination mode (testimony with LOOP status).
+        /// During cross-examination, the last testimony line doesn't show the forward arrow.
+        /// </summary>
+        private static bool IsInCrossExaminationMode()
         {
             try
             {
+                // r.no_0 == 7 indicates testimony/questioning mode
+                // LOOP status (0x8) indicates we're in the cross-examination loop
+                return GSStatic.global_work_ != null
+                    && GSStatic.global_work_.r.no_0 == 7
+                    && GSStatic.message_work_ != null
+                    && (GSStatic.message_work_.status & MessageSystem.Status.LOOP) != 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Central method for attempting to output dialogue.
+        /// Handles duplicate detection and all the logic for extracting and announcing text.
+        /// </summary>
+        private static void TryOutputDialogue()
+        {
+            try
+            {
+                var ctrl = messageBoardCtrl.instance;
+                if (ctrl == null || !ctrl.body_active)
+                    return;
+
                 // Get text from line_list
                 string text = CombineLines(ctrl);
 
@@ -342,5 +508,7 @@ namespace AccessibilityMod.Patches
             }
             return sb.ToString();
         }
+
+        #endregion
     }
 }
