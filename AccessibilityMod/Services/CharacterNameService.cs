@@ -40,8 +40,7 @@ namespace AccessibilityMod.Services
             { 28, "Cody Hackins" },
             { 31, "Lotta Hart" },
             { 32, "Yanni Yogi" },
-            { 33, "Polly" },
-            { 34, "Manfred von Karma" },
+            { 33, "Manfred von Karma" },
             // Rise from the Ashes (episode 5)
             { 45, "Lana Skye" },
             { 46, "Ema Skye" },
