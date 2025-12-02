@@ -49,7 +49,7 @@ namespace AccessibilityMod.Services
             { 39, "Miles Edgeworth" },
             // Rise from the Ashes (episode 5)
             { 45, "Lana Skye" },
-            { 46, "Ema Skye" },
+            { 44, "Ema Skye" },
             { 47, "Jake Marshall" },
             { 48, "Angel Starr" },
             { 49, "Bruce Goodman" },

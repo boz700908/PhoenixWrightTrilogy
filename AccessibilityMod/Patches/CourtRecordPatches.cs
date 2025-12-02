@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using AccessibilityMod.Core;
+using AccessibilityMod.Services;
 using HarmonyLib;
 
 namespace AccessibilityMod.Patches
@@ -11,6 +12,10 @@ namespace AccessibilityMod.Patches
         private static int _lastRecordCursor = -1;
         private static int _lastRecordPage = -1;
         private static int _lastRecordType = -1;
+
+        // Detail view state tracking
+        private static int _currentDetailId = -1;
+        private static int _currentDetailPageCount = 0;
 
         #region Court Record Open/Close
 
@@ -217,6 +222,9 @@ namespace AccessibilityMod.Patches
         {
             try
             {
+                // Store detail ID for page navigation
+                _currentDetailId = in_id;
+
                 // Get the current item from the record list
                 var recordList = recordListCtrl.instance;
                 if (recordList == null)
@@ -226,13 +234,107 @@ namespace AccessibilityMod.Patches
                 if (currentItem == null)
                     return;
 
-                string message = $"Viewing details: {currentItem.name}. Press B to close.";
-                ClipboardManager.Announce(message, TextType.Menu);
+                // Get detail data to check page count
+                var detailDataList = piceDataCtrl.instance.status_ext_bg_tbl;
+                int pageCount = 1;
+                uint bgId = 0;
+                if (detailDataList != null && in_id >= 0 && in_id < detailDataList.Count)
+                {
+                    var detailData = detailDataList[in_id];
+                    if (detailData != null)
+                    {
+                        bgId = detailData.bg_id;
+                        if (detailData.page_num > 0)
+                        {
+                            pageCount = (int)detailData.page_num;
+                        }
+                    }
+                }
+                _currentDetailPageCount = pageCount;
+
+                // Log detail info for adding descriptions
+                string gameName = "GS1";
+                try
+                {
+                    gameName = GSStatic.global_work_.title.ToString();
+                }
+                catch { }
+
+                bool hasDescription = EvidenceDetailService.HasDescription(in_id);
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Msg(
+                    $"[EvidenceDetail] Game: {gameName}, DetailID: {in_id}, BgID: {bgId}, "
+                        + $"Item: \"{currentItem.name}\", Pages: {pageCount}, HasDescription: {hasDescription}"
+                );
+
+                // Build announcement
+                StringBuilder sb = new StringBuilder();
+                sb.Append(currentItem.name).Append(". ");
+
+                // Try to get accessibility description
+                string description = EvidenceDetailService.GetDescription(in_id, 0);
+                if (!Net35Extensions.IsNullOrWhiteSpace(description))
+                {
+                    sb.Append(description);
+                }
+                else
+                {
+                    sb.Append("Detailed image view");
+                }
+
+                // Add page info if multi-page
+                if (pageCount > 1)
+                {
+                    sb.Append(" Page 1 of ").Append(pageCount).Append(".");
+                    sb.Append(" Press left or right for pages.");
+                }
+
+                sb.Append(" Press B to close.");
+                ClipboardManager.Announce(sb.ToString(), TextType.Menu);
             }
             catch (Exception ex)
             {
                 AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
                     $"Error in ViewDetail patch: {ex.Message}"
+                );
+            }
+        }
+
+        // Announce page changes in detail view
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(recordDetailCtrl), "ChengPage")]
+        public static void ChengPage_Postfix(int page_num)
+        {
+            try
+            {
+                if (_currentDetailId < 0)
+                    return;
+
+                StringBuilder sb = new StringBuilder();
+                sb.Append("Page ").Append(page_num + 1);
+
+                if (_currentDetailPageCount > 1)
+                {
+                    sb.Append(" of ").Append(_currentDetailPageCount);
+                }
+
+                sb.Append(". ");
+
+                // Try to get accessibility description for this page
+                string description = EvidenceDetailService.GetDescription(
+                    _currentDetailId,
+                    page_num
+                );
+                if (!Net35Extensions.IsNullOrWhiteSpace(description))
+                {
+                    sb.Append(description);
+                }
+
+                ClipboardManager.Announce(sb.ToString(), TextType.Menu);
+            }
+            catch (Exception ex)
+            {
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in ChengPage patch: {ex.Message}"
                 );
             }
         }
@@ -247,6 +349,8 @@ namespace AccessibilityMod.Patches
             _lastRecordCursor = -1;
             _lastRecordPage = -1;
             _lastRecordType = -1;
+            _currentDetailId = -1;
+            _currentDetailPageCount = 0;
         }
 
         #endregion
