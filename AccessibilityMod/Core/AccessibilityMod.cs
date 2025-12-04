@@ -51,8 +51,9 @@ namespace AccessibilityMod.Core
         {
             try
             {
-                // Update pointing navigator to detect mode changes
+                // Update navigators to detect mode changes
                 PointingNavigator.Update();
+                LuminolNavigator.Update();
 
                 HandleInput();
             }
@@ -87,6 +88,19 @@ namespace AccessibilityMod.Core
                 if (Input.GetKeyDown(KeyCode.RightBracket))
                 {
                     Evidence3DNavigator.NavigateNext();
+                }
+            }
+            // Luminol spray mode (GS1 Episode 5)
+            else if (AccessibilityState.IsInLuminolMode())
+            {
+                if (Input.GetKeyDown(KeyCode.LeftBracket))
+                {
+                    LuminolNavigator.NavigatePrevious();
+                }
+
+                if (Input.GetKeyDown(KeyCode.RightBracket))
+                {
+                    LuminolNavigator.NavigateNext();
                 }
             }
             // Pointing mode navigation (court maps, etc.)

@@ -90,6 +90,11 @@ namespace AccessibilityMod.Services
             return PointingNavigator.IsPointingActive();
         }
 
+        public static bool IsInLuminolMode()
+        {
+            return LuminolNavigator.IsLuminolActive();
+        }
+
         public static void AnnounceCurrentState()
         {
             try
@@ -100,6 +105,12 @@ namespace AccessibilityMod.Services
                 {
                     // Delegate to Evidence3DNavigator for detailed state
                     Evidence3DNavigator.AnnounceState();
+                    return;
+                }
+                else if (IsInLuminolMode())
+                {
+                    // Delegate to LuminolNavigator for detailed state
+                    LuminolNavigator.AnnounceState();
                     return;
                 }
                 else if (IsInPointingMode())
