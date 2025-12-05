@@ -55,9 +55,23 @@ namespace AccessibilityMod.Services
         {
             try
             {
-                if (DyingMessageMiniGame.instance != null)
+                if (DyingMessageMiniGame.instance == null)
+                    return false;
+
+                // body_active alone is unreliable - also check the game state
+                if (!DyingMessageMiniGame.instance.body_active)
+                    return false;
+
+                // Check SwDiemesProcState_ field to ensure we're in an active state
+                var stateField = typeof(DyingMessageMiniGame).GetField(
+                    "SwDiemesProcState_",
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
+                if (stateField != null)
                 {
-                    return DyingMessageMiniGame.instance.body_active;
+                    var state = stateField.GetValue(DyingMessageMiniGame.instance);
+                    // sw_die_mes_none = 0, anything else means active
+                    return Convert.ToInt32(state) != 0;
                 }
             }
             catch
