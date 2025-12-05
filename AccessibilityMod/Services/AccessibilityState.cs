@@ -115,6 +115,11 @@ namespace AccessibilityMod.Services
             return VaseShowNavigator.IsActive();
         }
 
+        public static bool IsInDyingMessageMode()
+        {
+            return DyingMessageNavigator.IsActive();
+        }
+
         public static void AnnounceCurrentState()
         {
             try
@@ -155,6 +160,12 @@ namespace AccessibilityMod.Services
                 {
                     // Delegate to VaseShowNavigator for detailed state
                     VaseShowNavigator.AnnounceState();
+                    return;
+                }
+                else if (IsInDyingMessageMode())
+                {
+                    // Delegate to DyingMessageNavigator for detailed state
+                    DyingMessageNavigator.AnnounceState();
                     return;
                 }
                 else if (IsInPointingMode())

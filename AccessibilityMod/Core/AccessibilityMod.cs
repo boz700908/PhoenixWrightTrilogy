@@ -58,6 +58,7 @@ namespace AccessibilityMod.Core
                 FingerprintNavigator.Update();
                 VideoTapeNavigator.Update();
                 VaseShowNavigator.Update();
+                DyingMessageNavigator.Update();
 
                 HandleInput();
             }
@@ -158,6 +159,26 @@ namespace AccessibilityMod.Core
                 if (Input.GetKeyDown(KeyCode.H))
                 {
                     VideoTapeNavigator.AnnounceHint();
+                }
+            }
+            // Dying message mode (GS1 Episode 5 - connect the dots)
+            else if (AccessibilityState.IsInDyingMessageMode())
+            {
+                // [ and ] - Navigate between dots
+                if (Input.GetKeyDown(KeyCode.LeftBracket))
+                {
+                    DyingMessageNavigator.NavigatePrevious();
+                }
+
+                if (Input.GetKeyDown(KeyCode.RightBracket))
+                {
+                    DyingMessageNavigator.NavigateNext();
+                }
+
+                // H - Get hint for spelling EMA
+                if (Input.GetKeyDown(KeyCode.H))
+                {
+                    DyingMessageNavigator.AnnounceHint();
                 }
             }
             // Vase show rotation mode (GS1 Episode 5 - unstable jar)
