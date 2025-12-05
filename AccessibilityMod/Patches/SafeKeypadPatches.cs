@@ -1,0 +1,108 @@
+using System.Reflection;
+using AccessibilityMod.Core;
+using HarmonyLib;
+
+namespace AccessibilityMod.Patches
+{
+    /// <summary>
+    /// Harmony patches for the safe keypad mini-game in GS1 Episode 5.
+    /// </summary>
+    [HarmonyPatch]
+    public static class SafeKeypadPatches
+    {
+        private static int _lastCursorX = -1;
+        private static int _lastCursorY = -1;
+
+        // Button layout matches the game's layout:
+        // Row 0: 1, 2, 3
+        // Row 1: 4, 5, 6
+        // Row 2: 7, 8, 9
+        // Row 3: 0, Back, Back
+        private static readonly int[,] ButtonLayout = new int[4, 3]
+        {
+            { 1, 2, 3 },
+            { 4, 5, 6 },
+            { 7, 8, 9 },
+            { 0, 10, 10 },
+        };
+
+        /// <summary>
+        /// Patch for cursor update to announce the current button.
+        /// </summary>
+        [HarmonyPatch(typeof(KinkoMiniGame), "CursorUpDate")]
+        [HarmonyPostfix]
+        public static void OnCursorUpdate(KinkoMiniGame __instance)
+        {
+            try
+            {
+                var cursorXField = typeof(KinkoMiniGame).GetField(
+                    "cursor_x",
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
+                var cursorYField = typeof(KinkoMiniGame).GetField(
+                    "cursor_y",
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
+
+                if (cursorXField != null && cursorYField != null)
+                {
+                    int cursorX = (int)cursorXField.GetValue(__instance);
+                    int cursorY = (int)cursorYField.GetValue(__instance);
+
+                    // Only announce if cursor position changed
+                    if (cursorX != _lastCursorX || cursorY != _lastCursorY)
+                    {
+                        _lastCursorX = cursorX;
+                        _lastCursorY = cursorY;
+
+                        int buttonValue = ButtonLayout[cursorY, cursorX];
+                        string buttonName = buttonValue == 10 ? "Back" : buttonValue.ToString();
+
+                        ClipboardManager.Announce(buttonName, TextType.Menu);
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore errors in patch
+            }
+        }
+
+        /// <summary>
+        /// Patch for when the keypad initializes to reset cursor tracking.
+        /// </summary>
+        [HarmonyPatch(typeof(KinkoMiniGame), "Init")]
+        [HarmonyPostfix]
+        public static void OnInit()
+        {
+            _lastCursorX = -1;
+            _lastCursorY = -1;
+            ClipboardManager.Announce("Safe keypad. Enter the 7-digit code.", TextType.Menu);
+        }
+
+        /// <summary>
+        /// Patch for when a number is entered.
+        /// </summary>
+        [HarmonyPatch(typeof(KinkoMiniGame), "SetNumber")]
+        [HarmonyPostfix]
+        public static void OnSetNumber(int num)
+        {
+            try
+            {
+                if (num == 10)
+                {
+                    ClipboardManager.Announce("Deleted", TextType.Menu);
+                }
+                else
+                {
+                    // Number entered - the game plays a sound, we just confirm
+                    ClipboardManager.Announce($"Entered {num}", TextType.Menu);
+                }
+            }
+            catch
+            {
+                // Ignore errors
+            }
+        }
+    }
+}
