@@ -11,6 +11,7 @@ namespace AccessibilityMod.Services
     {
         private static Dictionary<int, string> _nameCache = new Dictionary<int, string>();
         private static bool _initialized = false;
+        private static TitleId _cachedTitle = TitleId.GS1;
 
         // GS1 sprite index to character name mapping
         // Verified from GalleryActionStudioCtrl.CHARACTER_TABLE
@@ -173,8 +174,22 @@ namespace AccessibilityMod.Services
             if (spriteId <= 0)
                 return "";
 
+            // Check if game changed and clear cache if so
+            try
+            {
+                if (GSStatic.global_work_ != null)
+                {
+                    TitleId currentGame = GSStatic.global_work_.title;
+                    if (currentGame != _cachedTitle)
+                    {
+                        _nameCache.Clear();
+                        _cachedTitle = currentGame;
+                    }
+                }
+            }
+            catch { }
+
             // Check cache first
-            string cacheKey = GetCacheKey(spriteId);
             if (_nameCache.ContainsKey(spriteId))
             {
                 var cached = _nameCache[spriteId];
@@ -185,16 +200,7 @@ namespace AccessibilityMod.Services
             try
             {
                 string name = "";
-                TitleId currentGame = TitleId.GS1;
-
-                try
-                {
-                    if (GSStatic.global_work_ != null)
-                    {
-                        currentGame = GSStatic.global_work_.title;
-                    }
-                }
-                catch { }
+                TitleId currentGame = _cachedTitle;
 
                 // Get name from game-specific dictionary
                 Dictionary<int, string> nameDict = null;
