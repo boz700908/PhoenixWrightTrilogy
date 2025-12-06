@@ -74,6 +74,7 @@ namespace AccessibilityMod.Services
             { 11, "Phone" },
             { 12, "Dustin Prince" },
             { 13, "Bailiff" },
+            { 15, "Franziska von Karma" },
             { 16, "Richard Wellington" },
             { 17, "Maggey Byrde" },
             { 18, "Director Hotti" },

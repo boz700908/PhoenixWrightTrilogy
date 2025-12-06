@@ -39,7 +39,8 @@ namespace AccessibilityMod.Patches
         }
 
         /// <summary>
-        /// Gets the total number of locks for a psyche-lock by index.
+        /// Gets the remaining number of locks for a psyche-lock by index.
+        /// Uses 'level' which decrements as locks are broken, not 'size' which is the original count.
         /// </summary>
         public static int GetTotalLocks(int psyIndex)
         {
@@ -56,7 +57,8 @@ namespace AccessibilityMod.Patches
                 if (psylockData == null || (psylockData.status & 1) == 0)
                     return 0;
 
-                return psylockData.size;
+                // Use 'level' not 'size' - level decrements as locks break
+                return psylockData.level;
             }
             catch
             {
@@ -120,15 +122,18 @@ namespace AccessibilityMod.Patches
         }
 
         // Patch for when a lock is broken - announces remaining locks
+        // Note: PsylockDisp_unlock() just sets the state machine to unlock mode.
+        // The actual decrement of psy.rest happens in psylock_move_lock_unlock()
+        // on the next frame. So we need to subtract 1 from the current count.
         [HarmonyPostfix]
         [HarmonyPatch(typeof(GSPsylock), "PsylockDisp_unlock")]
         public static void PsylockDisp_unlock_Postfix()
         {
             try
             {
-                // The unlock method decrements psy.rest, so we need to get the current value
-                // after decrement. We track this based on our stored total.
-                int remaining = GetRemainingLocks();
+                // GetRemainingLocks() returns the current value before decrement,
+                // so we subtract 1 to get the value after the lock breaks
+                int remaining = GetRemainingLocks() - 1;
 
                 // Avoid duplicate announcements
                 if (remaining == _lastAnnouncedLockCount)
