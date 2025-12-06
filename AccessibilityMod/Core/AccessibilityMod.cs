@@ -70,11 +70,12 @@ namespace AccessibilityMod.Core
 
         private void HandleInput()
         {
-            // R - Repeat last output (disabled in vase puzzle and vase show modes since R is rotate)
+            // R - Repeat last output (disabled in vase puzzle, vase show, and court record modes since R has other functions)
             if (
                 Input.GetKeyDown(KeyCode.R)
                 && !AccessibilityState.IsInVasePuzzleMode()
                 && !AccessibilityState.IsInVaseShowMode()
+                && !AccessibilityState.IsInCourtRecordMode()
             )
             {
                 ClipboardManager.RepeatLast();

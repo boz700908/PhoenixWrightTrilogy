@@ -120,6 +120,22 @@ namespace AccessibilityMod.Services
             return DyingMessageNavigator.IsActive();
         }
 
+        public static bool IsInCourtRecordMode()
+        {
+            try
+            {
+                if (recordListCtrl.instance != null && recordListCtrl.instance.is_open)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // Class may not exist in current context
+            }
+            return false;
+        }
+
         public static void AnnounceCurrentState()
         {
             try
