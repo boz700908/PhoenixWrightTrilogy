@@ -23,6 +23,7 @@ namespace AccessibilityMod.Patches
         private static FieldInfo _albumTableField;
         private static FieldInfo _playingMusicDataField;
         private static PropertyInfo _isPlayingMusicProperty;
+        private static FieldInfo _isExecutingField;
 
         // Cached type for nested AlbumTableData
         private static Type _albumTableDataType;
@@ -31,8 +32,53 @@ namespace AccessibilityMod.Patches
 
         /// <summary>
         /// Returns whether the Orchestra music player is currently active.
+        /// Checks actual game state, not just our tracking flag.
         /// </summary>
-        public static bool IsOrchestraActive => _isOrchestraActive;
+        public static bool IsOrchestraActive
+        {
+            get
+            {
+                try
+                {
+                    // First check our flag - if false, definitely not active
+                    if (!_isOrchestraActive)
+                        return false;
+
+                    // Verify with actual game state
+                    var instance = UnityEngine.Object.FindObjectOfType<GalleryOrchestraCtrl>();
+                    if (instance == null)
+                    {
+                        _isOrchestraActive = false;
+                        return false;
+                    }
+
+                    // Check m_IsExecuting field
+                    if (_isExecutingField == null)
+                    {
+                        _isExecutingField = typeof(GalleryOrchestraCtrl).GetField(
+                            "m_IsExecuting",
+                            BindingFlags.NonPublic | BindingFlags.Instance
+                        );
+                    }
+
+                    if (_isExecutingField != null)
+                    {
+                        bool isExecuting = (bool)_isExecutingField.GetValue(instance);
+                        if (!isExecuting)
+                        {
+                            _isOrchestraActive = false;
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+                catch
+                {
+                    return _isOrchestraActive;
+                }
+            }
+        }
 
         #region Initialization
 
