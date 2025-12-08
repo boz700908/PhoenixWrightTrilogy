@@ -74,6 +74,7 @@ namespace AccessibilityMod.Services
             { 11, "Phone" },
             { 12, "Dustin Prince" },
             { 13, "Bailiff" },
+            { 14, "Franziska von Karma" },
             { 15, "Franziska von Karma" },
             { 16, "Richard Wellington" },
             { 17, "Maggey Byrde" },
@@ -86,65 +87,23 @@ namespace AccessibilityMod.Services
             { 25, "Matt Engarde" },
             { 26, "Nurse" },
             { 27, "Mimi Miney" },
-            { 28, "Celeste Inpax" },
-            { 29, "Shelly de Killer" },
-            { 30, "Will Powers" },
-            { 31, "Wendy Oldbag" },
+            { 28, "Regina Berry" },
+            { 29, "Max" },
+            { 30, "Ben" },
+            { 31, "Moe" },
+            { 32, "Acro" },
+            { 33, "Trilo" },
+            { 34, "Money the Monkey" },
+            { 40, "Will Powers" },
+            { 46, "Russell Berry" },
         };
 
-        // GS3 uses a remapping table - these are the OUTPUT sprite indices
-        // The input speaker IDs are remapped via name_id_tbl first
+        // GS3 speaker IDs - must be filled in by playing the game
+        // The Japanese code constants (scenario_GS3.cs) do NOT match the English version
+        // Add entries as: { speakerId, "Character Name" }
         private static readonly Dictionary<int, string> GS3_NAMES = new Dictionary<int, string>
         {
-            { 0, "Phoenix Wright" },
-            { 1, "Mia Fey" },
-            { 2, "Maya Fey" },
-            { 3, "Miles Edgeworth" },
-            { 4, "Dick Gumshoe" },
-            { 5, "Larry Butz" },
-            { 6, "Phoenix Wright" }, // Young Phoenix
-            { 7, "Pearl Fey" },
-            { 8, "Franziska von Karma" },
-            { 9, "Judge" },
-            { 10, "Winston Payne" },
-            { 11, "Lotta Hart" },
-            { 12, "Will Powers" },
-            { 13, "Wendy Oldbag" },
-            { 14, "Cody Hackins" },
-            { 15, "Dahlia Hawthorne" },
-            { 16, "Viola Cadaverini" },
-            { 17, "Furio Tigre" },
-            { 18, "Jean Armstrong" },
-            { 19, "Victor Kudo" },
-            { 20, "Maya Fey" },
-            { 21, "Marvin Grossberg" },
-            { 22, "Terry Fawles" },
-            { 23, "Valerie Hawthorne" },
-            { 24, "Doug Swallow" },
-            { 25, "Gregory Edgeworth" },
-            { 26, "Polly" },
-            { 27, "Glen Elg" },
-            { 28, "Lisa Basil" },
-            { 29, "Mask*DeMasque" },
-            { 30, "Luke Atmey" },
-            { 31, "Ron DeLite" },
-            { 32, "Desirée DeLite" },
-            { 33, "Kane Bullard" },
-            { 34, "Adrian Andrews" },
-            { 35, "Bikini" },
-            { 36, "Iris" },
-            { 37, "Elise Deauxnim" },
-            { 38, "Larry Butz" },
-            { 39, "Morgan Fey" },
-            { 40, "Godot" },
-            { 41, "Dahlia Hawthorne" },
-            { 42, "Sister Iris" },
-            { 43, "Misty Fey" },
-            { 44, "Young Miles Edgeworth" },
-            { 45, "Young Larry" },
-            { 46, "Judge's Brother" },
-            { 47, "Maggey Byrde" },
-            { 48, "Young Mia" },
+            // Fill in as you encounter characters - the mod will log unknown IDs
         };
 
         public static void Initialize()
@@ -218,6 +177,18 @@ namespace AccessibilityMod.Services
                 if (nameDict != null && nameDict.ContainsKey(spriteId))
                 {
                     name = nameDict[spriteId];
+                }
+                else if (spriteId > 0)
+                {
+                    // Log unknown speaker IDs so they can be identified during gameplay
+                    // For GS3, this is expected since the mapping must be built manually
+                    if (currentGame == TitleId.GS3)
+                    {
+                        AccessibilityMod.Core.AccessibilityMod.Logger?.Msg(
+                            $"GS3 speaker ID {spriteId} - add to CharacterNameService.GS3_NAMES"
+                        );
+                        name = $"Speaker {spriteId}";
+                    }
                 }
 
                 // Cache the result

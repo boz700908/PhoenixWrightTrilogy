@@ -25,12 +25,10 @@ namespace AccessibilityMod.Patches
                     case lifeGaugeCtrl.Gauge_State.LIFE_ON:
                     case lifeGaugeCtrl.Gauge_State.LIFE_ON_MOMENT:
                         // Life gauge became visible
-                        AnnounceCurrentHealth();
                         AccessibilityState.SetMode(AccessibilityState.GameMode.Trial);
                         break;
 
                     case lifeGaugeCtrl.Gauge_State.DAMAGE:
-                        ClipboardManager.Announce("Penalty!", TextType.Trial);
                         AnnounceCurrentHealth();
                         break;
 

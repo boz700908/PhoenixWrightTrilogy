@@ -83,6 +83,11 @@ namespace AccessibilityMod.Core
 
             EnqueueText(formattedText);
             AccessibilityMod.Logger?.Msg($"[{textType}] {formattedText}");
+
+            // In debug builds, log full stack trace for easier debugging
+#if DEBUG
+            AccessibilityMod.Logger?.Msg(Environment.StackTrace);
+#endif
         }
 
         public static void Announce(string text, TextType textType = TextType.SystemMessage)
