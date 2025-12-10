@@ -120,6 +120,11 @@ namespace AccessibilityMod.Services
             return DyingMessageNavigator.IsActive();
         }
 
+        public static bool IsInBugSweeperMode()
+        {
+            return BugSweeperNavigator.IsBugSweeperActive();
+        }
+
         public static bool IsInOrchestraMode()
         {
             return GalleryOrchestraNavigator.IsOrchestraActive();
@@ -187,6 +192,12 @@ namespace AccessibilityMod.Services
                 {
                     // Delegate to DyingMessageNavigator for detailed state
                     DyingMessageNavigator.AnnounceState();
+                    return;
+                }
+                else if (IsInBugSweeperMode())
+                {
+                    // Delegate to BugSweeperNavigator for detailed state
+                    BugSweeperNavigator.AnnounceState();
                     return;
                 }
                 else if (IsInOrchestraMode())

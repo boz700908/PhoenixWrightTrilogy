@@ -59,6 +59,7 @@ namespace AccessibilityMod.Core
                 VideoTapeNavigator.Update();
                 VaseShowNavigator.Update();
                 DyingMessageNavigator.Update();
+                BugSweeperNavigator.Update();
 
                 HandleInput();
             }
@@ -189,6 +190,15 @@ namespace AccessibilityMod.Core
                 if (Input.GetKeyDown(KeyCode.H))
                 {
                     DyingMessageNavigator.AnnounceHint();
+                }
+            }
+            // Bug sweeper mode (GS2/GS3 - scan for listening devices)
+            else if (AccessibilityState.IsInBugSweeperMode())
+            {
+                // H - Announce current state/hint
+                if (Input.GetKeyDown(KeyCode.H))
+                {
+                    BugSweeperNavigator.AnnounceState();
                 }
             }
             // Vase show rotation mode (GS1 Episode 5 - unstable jar)
