@@ -341,7 +341,7 @@ namespace AccessibilityMod.Services
                 {
                     name = nameDict[spriteId];
                 }
-                else if (spriteId > 2 && spriteId < 66)
+                else if (spriteId > 2)
                 {
                     // Log unknown speaker IDs
                     AccessibilityMod.Core.AccessibilityMod.Logger?.Msg(
