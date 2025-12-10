@@ -6,6 +6,7 @@ namespace AccessibilityMod.Services
     /// <summary>
     /// Service for mapping speaker sprite IDs to character names.
     /// Each game (GS1, GS2, GS3) has its own frame02 sprite sheet with different indices.
+    /// For GS3, we use the actual sprite index (after remapping) which is unique per nameplate.
     /// </summary>
     public static class CharacterNameService
     {
@@ -66,14 +67,12 @@ namespace AccessibilityMod.Services
         {
             { 3, "Phoenix Wright" },
             { 4, "Maya Fey" },
-            { 5, "Miles Edgeworth" },
             { 6, "Mia Fey" },
             { 7, "Judge" },
             { 8, "Miles Edgeworth" },
             { 9, "Winston Payne" },
             { 10, "Dick Gumshoe" },
             { 11, "Phone" },
-            { 12, "Dustin Prince" },
             { 13, "Bailiff" },
             { 14, "Franziska von Karma" },
             { 15, "Franziska von Karma" },
@@ -108,12 +107,15 @@ namespace AccessibilityMod.Services
             { 54, "John Doe" },
         };
 
-        // GS3 speaker IDs - must be filled in by playing the game
-        // The Japanese code constants (scenario_GS3.cs) do NOT match the English version
-        // Add entries as: { speakerId, "Character Name" }
+        // GS3 raw speaker IDs from message_work.speaker_id
+        // These are the unique identifiers for each character, NOT the sprite indices
         private static readonly Dictionary<int, string> GS3_NAMES = new Dictionary<int, string>
         {
-            // Fill in as you encounter characters - the mod will log unknown IDs
+            { 3, "Phoenix Wright" },
+            { 5, "Judge" },
+            { 7, "Mia Fey" },
+            { 9, "Winston Payne" },
+            { 42, "Marvin Grossberg" },
         };
 
         public static void Initialize()
@@ -128,7 +130,7 @@ namespace AccessibilityMod.Services
         /// <summary>
         /// Get character name from sprite ID
         /// </summary>
-        /// <param name="spriteId">The sprite ID from the name_plate call</param>
+        /// <param name="spriteId">The sprite ID (for GS3, this is the actual sprite index after remapping)</param>
         /// <returns>Character name or empty string if unknown</returns>
         public static string GetName(int spriteId)
         {
@@ -138,12 +140,14 @@ namespace AccessibilityMod.Services
             if (spriteId <= 0)
                 return "";
 
-            // Check if game changed and clear cache if so
+            TitleId currentGame = TitleId.GS1;
+
+            // Get current game and clear cache if changed
             try
             {
                 if (GSStatic.global_work_ != null)
                 {
-                    TitleId currentGame = GSStatic.global_work_.title;
+                    currentGame = GSStatic.global_work_.title;
                     if (currentGame != _cachedTitle)
                     {
                         _nameCache.Clear();
@@ -164,7 +168,6 @@ namespace AccessibilityMod.Services
             try
             {
                 string name = "";
-                TitleId currentGame = _cachedTitle;
 
                 // Get name from game-specific dictionary
                 Dictionary<int, string> nameDict = null;
@@ -188,17 +191,13 @@ namespace AccessibilityMod.Services
                 {
                     name = nameDict[spriteId];
                 }
-                else if (spriteId > 0)
+                else if (spriteId > 2 && spriteId < 66)
                 {
-                    // Log unknown speaker IDs so they can be identified during gameplay
-                    // For GS3, this is expected since the mapping must be built manually
-                    if (currentGame == TitleId.GS3)
-                    {
-                        AccessibilityMod.Core.AccessibilityMod.Logger?.Msg(
-                            $"GS3 speaker ID {spriteId} - add to CharacterNameService.GS3_NAMES"
-                        );
-                        name = $"Speaker {spriteId}";
-                    }
+                    // Log unknown speaker IDs
+                    AccessibilityMod.Core.AccessibilityMod.Logger?.Msg(
+                        $"{currentGame} sprite ID {spriteId} - add {{ {spriteId}, \"NAME\" }} to {currentGame}_NAMES"
+                    );
+                    name = $"Speaker {spriteId}";
                 }
 
                 // Cache the result

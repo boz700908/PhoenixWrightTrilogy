@@ -222,7 +222,8 @@ namespace AccessibilityMod.Patches
         }
 
         /// <summary>
-        /// Hook when speaker name changes. Track the current speaker ID.
+        /// Hook when speaker name changes. Track the current speaker ID as fallback.
+        /// The primary source for speaker ID is now message_work.speaker_id in TryOutputDialogue.
         /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(typeof(messageBoardCtrl), "name_plate")]
@@ -235,11 +236,6 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                if (in_name && in_name_no > 0)
-                {
-                    AccessibilityMod.Core.AccessibilityMod.Logger?.Msg($"Speaker ID: {in_name_no}");
-                }
-
                 if (in_name && in_name_no != _lastSpeakerId)
                 {
                     _lastSpeakerId = in_name_no;
@@ -411,35 +407,30 @@ namespace AccessibilityMod.Patches
                 // Replace button placeholders with actual key names
                 text = ReplaceButtonPlaceholders(ctrl, text);
 
-                // Get speaker name only if the name plate is actually visible
-                // This is more robust than caching speaker IDs, as the game may display
-                // text without a speaker (credits, narration) without explicitly clearing the name
+                // Get speaker name - try multiple sources
                 string speakerName = "";
-                bool namePlateVisible = false;
+                int speakerId = 0;
+
+                // Get speaker_id from message_work - this is the unique identifier for who's speaking
+                // The speaker_id may have bit 128 set for certain message types, so mask it off
                 try
                 {
-                    namePlateVisible = ctrl.sprite_name != null && ctrl.sprite_name.active;
+                    if (GSStatic.message_work_ != null)
+                    {
+                        speakerId = GSStatic.message_work_.speaker_id & 0x7F;
+                    }
                 }
                 catch { }
 
-                if (namePlateVisible && _lastSpeakerId > 0)
+                // Fallback to cached _lastSpeakerId from name_plate calls if message_work unavailable
+                if (speakerId <= 0 && _lastSpeakerId > 0)
                 {
-                    speakerName = CharacterNameService.GetName(_lastSpeakerId);
+                    speakerId = _lastSpeakerId;
                 }
 
-                // Also try to get from GSStatic if available (only if name plate is visible)
-                if (Net35Extensions.IsNullOrWhiteSpace(speakerName) && namePlateVisible)
+                if (speakerId > 0)
                 {
-                    try
-                    {
-                        if (GSStatic.message_work_ != null && GSStatic.message_work_.speaker_id > 0)
-                        {
-                            speakerName = CharacterNameService.GetName(
-                                GSStatic.message_work_.speaker_id
-                            );
-                        }
-                    }
-                    catch { }
+                    speakerName = CharacterNameService.GetName(speakerId);
                 }
 
                 ClipboardManager.Output(speakerName, text, TextType.Dialogue);
