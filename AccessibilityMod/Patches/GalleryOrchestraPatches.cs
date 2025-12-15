@@ -23,7 +23,6 @@ namespace AccessibilityMod.Patches
         private static FieldInfo _albumTableField;
         private static FieldInfo _playingMusicDataField;
         private static PropertyInfo _isPlayingMusicProperty;
-        private static FieldInfo _isExecutingField;
 
         // Cached type for nested AlbumTableData
         private static Type _albumTableDataType;
@@ -44,7 +43,7 @@ namespace AccessibilityMod.Patches
                     if (!_isOrchestraActive)
                         return false;
 
-                    // Verify with actual game state
+                    // Verify with actual game state - check if instance exists
                     var instance = UnityEngine.Object.FindObjectOfType<GalleryOrchestraCtrl>();
                     if (instance == null)
                     {
@@ -52,24 +51,10 @@ namespace AccessibilityMod.Patches
                         return false;
                     }
 
-                    // Check m_IsExecuting field
-                    if (_isExecutingField == null)
-                    {
-                        _isExecutingField = typeof(GalleryOrchestraCtrl).GetField(
-                            "m_IsExecuting",
-                            BindingFlags.NonPublic | BindingFlags.Instance
-                        );
-                    }
-
-                    if (_isExecutingField != null)
-                    {
-                        bool isExecuting = (bool)_isExecutingField.GetValue(instance);
-                        if (!isExecuting)
-                        {
-                            _isOrchestraActive = false;
-                            return false;
-                        }
-                    }
+                    // Note: We intentionally do NOT check m_IsExecuting here.
+                    // m_IsExecuting is only set to true after the fade-in animation completes,
+                    // but we want to consider the orchestra active as soon as Play() is called.
+                    // Our _isOrchestraActive flag is set in Play_Postfix and cleared in OnForceClose_Postfix.
 
                     return true;
                 }
