@@ -352,19 +352,18 @@ namespace AccessibilityMod.Services
             if (_hotspots.Count > 0)
             {
                 int unexamined = _hotspots.Count(h => !h.IsExamined);
-                string message = $"Investigation mode. {_hotspots.Count} points of interest";
+                string message = L.Get("investigation.mode_start", _hotspots.Count);
                 if (unexamined < _hotspots.Count)
                 {
-                    message += $", {unexamined} unexamined";
+                    message += " " + L.Get("investigation.unexamined_count", unexamined);
                 }
-                message +=
-                    ". Use [ and ] to navigate, U to jump to next unexamined point, H to list all.";
+                message += " " + L.Get("investigation.controls_hint");
                 SpeechManager.Announce(message, TextType.Investigation);
             }
             else
             {
                 SpeechManager.Announce(
-                    "Investigation mode. No points of interest found.",
+                    L.Get("investigation.mode_start_no_points"),
                     TextType.Investigation
                 );
             }
