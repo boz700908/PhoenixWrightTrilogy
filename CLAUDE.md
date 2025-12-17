@@ -87,6 +87,8 @@ All patches use `[HarmonyPostfix]` (or `[HarmonyPrefix]` for capture-before-clea
 
 ### Services
 
+- **LocalizationService**: Multi-language string management with English fallback. Auto-detects game language and reloads on language change.
+- **L**: Shorthand alias for `LocalizationService.Get()` - use `L.Get("key")` throughout the codebase
 - **CharacterNameService**: Maps sprite IDs to character names. Supports hot-reload from JSON files
 - **EvidenceDetailService**: Provides accessibility descriptions for evidence detail images. Supports hot-reload from text files
 - **HotspotNavigator**: Parses `GSStatic.inspect_data_` to enable list-based navigation of examination points
@@ -102,14 +104,60 @@ All patches use `[HarmonyPostfix]` (or `[HarmonyPrefix]` for capture-before-clea
 - **BugSweeperNavigator**: Bug sweeper minigame hints
 - **GalleryOrchestraNavigator**: Orchestra music player accessibility
 
+### Input Handling
+
+**InputManager** processes keyboard input with mode-specific priority. Modes are checked in this order (first match wins):
+
+1. 3D Evidence → 2. Luminol → 3. Vase Puzzle → 4. Fingerprint → 5. Video Tape → 6. Orchestra → 7. Dying Message → 8. Bug Sweeper → 9. Vase Show → 10. Pointing → 11. Investigation → 12. Trial (H key only)
+
+Mode detection delegates to `AccessibilityState.IsIn[Mode]()` methods which check game singleton instances.
+
 ## Configuration Files
 
-Character names and evidence details can be overridden via files in `UserData/AccessibilityMod/`:
+All configuration files live in `$(GamePath)/UserData/AccessibilityMod/`. Press **F5** in-game to hot-reload without restarting.
 
-- `GS1_Names.json`, `GS2_Names.json`, `GS3_Names.json` - Character name mappings (key=sprite ID, value=name)
-- `EvidenceDetails/GS1/*.txt`, `GS2/*.txt`, `GS3/*.txt` - Evidence detail descriptions (filename=detail_id, `===` separates pages)
+### Folder Structure
 
-Press **F5** in-game to hot-reload these files without restarting.
+```
+UserData/AccessibilityMod/
+├── en/                     # English (fallback) localisation
+│   ├── strings.json        # UI strings for the mod
+│   ├── GS1_Names.json      # GS1 character name mappings
+│   ├── GS2_Names.json      # GS2 character name mappings
+│   ├── GS3_Names.json      # GS3 character name mappings
+│   └── EvidenceDetails/    # Evidence detail descriptions
+│       ├── GS1/*.txt
+│       ├── GS2/*.txt
+│       └── GS3/*.txt
+├── ja/                     # Japanese localisation (same structure)
+├── fr/                     # French localisation
+└── [other languages]/      # de, ko, zh-Hans, zh-Hant, pt-BR, es
+```
+
+### Character Names
+
+JSON files map sprite IDs to display names:
+```json
+{"1": "Phoenix", "2": "Maya", "10": "Edgeworth"}
+```
+
+### Evidence Details
+
+Text files named by detail_id. Use `===` to separate multiple pages:
+```
+This is page 1 of the evidence description.
+===
+This is page 2.
+```
+
+### Localisation
+
+The mod auto-detects game language via `GSStatic.global_work_.language` and loads strings from the appropriate folder with English fallback. Supported languages:
+- USA → `en/`, JAPAN → `ja/`, FRANCE → `fr/`, GERMAN → `de/`
+- KOREA → `ko/`, CHINA_S → `zh-Hans/`, CHINA_T → `zh-Hant/`
+- Pt_BR → `pt-BR/`, ES_419 → `es/`
+
+Use `L.Get("key")` or `L.Get("key", arg1, arg2)` for localised strings (alias for `LocalizationService.Get()`).
 
 ## Important Patterns
 
