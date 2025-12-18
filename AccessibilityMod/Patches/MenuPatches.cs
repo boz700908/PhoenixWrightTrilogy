@@ -26,6 +26,27 @@ namespace AccessibilityMod.Patches
         // Scenario selection tracking (Play Title episode selection)
         private static int _lastScenarioEpisode = -1;
 
+        #region Start Screen Patch
+
+        // Start screen - announce "Press Enter to Start" text when game finishes loading
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(startCtrl), "inputTextSet")]
+        public static void StartCtrl_InputTextSet_Postfix(startCtrl __instance)
+        {
+            try
+            {
+                SpeechManager.Announce(L.Get("system.loaded"), TextType.SystemMessage);
+            }
+            catch (Exception ex)
+            {
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in StartCtrl_InputTextSet patch: {ex.Message}"
+                );
+            }
+        }
+
+        #endregion
+
         #region Main Title Menu Patches
 
         // Main title menu initialization - announce when main menu appears

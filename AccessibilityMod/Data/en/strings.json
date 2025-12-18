@@ -7,6 +7,7 @@
   "system.not_in_mode": "Not in {0} mode",
   "system.unable_to_read_state": "Unknown state",
   "system.initialized": "Accessibility initialized",
+  "system.loaded": "Press enter to start",
 
   "_section_modes": "=== Mode Names ===",
   "mode.generic": "{0} mode",
