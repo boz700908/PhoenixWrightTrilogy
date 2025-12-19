@@ -3,6 +3,7 @@ using System.Text;
 using AccessibilityMod.Core;
 using AccessibilityMod.Services;
 using HarmonyLib;
+using UnityEngine.UI;
 using L = AccessibilityMod.Services.L;
 
 namespace AccessibilityMod.Patches
@@ -320,6 +321,52 @@ namespace AccessibilityMod.Patches
             {
                 AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
                     $"Error in ChengPage patch: {ex.Message}"
+                );
+            }
+        }
+
+        #endregion
+
+        #region Evidence Added Popup
+
+        /// <summary>
+        /// Hook when evidence is added to the court record and the popup plays.
+        /// This announces the evidence name along with its full description to match the visual display.
+        /// </summary>
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(picePlateCtrl), "playPice")]
+        public static void PlayPice_Postfix(picePlateCtrl __instance)
+        {
+            try
+            {
+                // Get the evidence name from the icon_name text
+                string name = __instance.icon_name?.text;
+                if (Net35Extensions.IsNullOrWhiteSpace(name))
+                    return;
+
+                // Build announcement with name and description
+                StringBuilder sb = new StringBuilder();
+                sb.Append(name);
+
+                // Get description lines from the comment
+                var comment = __instance.comment;
+                if (comment?.line_ != null)
+                {
+                    foreach (var line in comment.line_)
+                    {
+                        if (line != null && !Net35Extensions.IsNullOrWhiteSpace(line.text))
+                        {
+                            sb.Append(". ").Append(line.text);
+                        }
+                    }
+                }
+
+                SpeechManager.Announce(sb.ToString(), TextType.Menu);
+            }
+            catch (Exception ex)
+            {
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
+                    $"Error in PlayPice patch: {ex.Message}"
                 );
             }
         }
