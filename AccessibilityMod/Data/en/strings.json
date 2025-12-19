@@ -108,6 +108,8 @@
   "luminol.hit_more_needed.one": "Hit! {0} more spray needed.",
   "luminol.hit_more_needed.other": "Hit! {0} more sprays needed.",
   "luminol.blood_found": "Blood trace found!",
+  "luminol.controls_hint_generic": "Use arrow keys to move cursor, Enter to spray, Backspace to exit.",
+  "luminol.spray_key_hint": "Press Enter to spray.",
 
   "_section_fingerprint": "=== Fingerprint Mode ===",
   "fingerprint.start": "Fingerprint examination. {0} locations to examine. Use [ and ] to navigate, Enter to examine. Press H for hint.",

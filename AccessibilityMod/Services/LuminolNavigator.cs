@@ -110,15 +110,15 @@ namespace AccessibilityMod.Services
                     L.Get("luminol.mode_entry", undiscoveredCount)
                     + " "
                     + L.Get("navigation.use_brackets_navigate")
-                    + ", Enter to spray."
+                    + ", "
+                    + L.Get("luminol.spray_key_hint")
                     + scrollHint;
                 SpeechManager.Announce(message, TextType.Investigation);
             }
             else
             {
                 SpeechManager.Announce(
-                    L.Get("mode.luminol")
-                        + ". Use arrow keys to move cursor, Enter to spray, B to exit.",
+                    L.Get("mode.luminol") + ". " + L.Get("luminol.controls_hint_generic"),
                     TextType.Investigation
                 );
             }
