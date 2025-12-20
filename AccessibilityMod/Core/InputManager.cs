@@ -1,4 +1,5 @@
 using System;
+using AccessibilityMod.Patches;
 using AccessibilityMod.Services;
 using UnityEngine;
 
@@ -278,6 +279,7 @@ namespace AccessibilityMod.Core
                 LocalizationService.ReloadFromFiles();
                 CharacterNameService.ReloadFromFiles();
                 EvidenceDetailService.ReloadFromFiles();
+                StaffRollPatches.ReloadData();
                 SpeechManager.Announce(L.Get("system.config_reloaded"));
                 AccessibilityMod.Logger.Msg("Configuration files reloaded via F5");
             }

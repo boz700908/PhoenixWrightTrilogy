@@ -54,7 +54,11 @@ namespace AccessibilityMod.Core
             _lastOutputTime = now;
 
             // Store for repeat functionality
-            if (textType == TextType.Dialogue || textType == TextType.Narrator)
+            if (
+                textType == TextType.Dialogue
+                || textType == TextType.Narrator
+                || textType == TextType.Credits
+            )
             {
                 _currentSpeaker = speaker ?? "";
                 _currentText = text;
@@ -125,5 +129,6 @@ namespace AccessibilityMod.Core
         SystemMessage,
         Trial,
         PsycheLock,
+        Credits,
     }
 }
