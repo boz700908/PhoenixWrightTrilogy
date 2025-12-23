@@ -1,0 +1,5 @@
+A schematic map displays two distinct locations: the circular Berry Big Circus Big Top on the left and a rectangular Lodging House on the right.
+
+The left side features a partial view of a large circular structure labeled "Berry Big Circus Big Top" in the center. Surrounding the central ring is a segmented outer corridor. The top segment is labeled "Ringmaster's Room," and the adjacent segment moving clockwise is labeled "Cafeteria."
+
+On the right, a rectangular building area is labeled "Lodging House." Inside this block, two smaller squares indicate specific rooms: "Moe (1F)" in the upper left corner and "Acro (3F)" in the lower right corner. A symbol representing double doors is located on the bottom wall of the Lodging House, opening onto a grey pathway that separates the two buildings.
