@@ -1,0 +1,41 @@
+# Staff Roll Credits for GS1 Episode 5
+# Each line (non-comment) corresponds to one staff credit image, in display order.
+# Empty lines will be silent. Lines starting with # are comments.
+# Format: "Job Title: Name" or just the text content of the image.
+# Press F5 in-game to reload after making changes.
+#
+# Note: The staff roll images show these credits visually.
+# You may need to adjust the text below to match what appears in your game.
+# The number of entries should match the number of staff roll images (28 for English).
+
+企划·剧本·监制：巧 舟
+企划：山崎 刚
+设计：涂和也
+
+■ 原画  ：岸本 泰明  ，榎本 哲也
+原画：荻原 光之郎，永木 佑命
+动画制作：深町 幸太，石川 貴篼
+
+■ 美术人员  ：村本 シュウイチ  ，武田 清子  ，森田 泰弘
+美术人员：青木 弘二，中嶋 千惠，山本 利彦
+
+程序人员：佐藤 文昭
+程序人员：堺仁志，三方 史朗，金子 大介
+
+音乐：木村 明美
+
+本地化人员：Seigai Kou，Mickey Yang，Wei-Ming Chen
+Voldo Cheng，Ching-Wung Wang，Shih-Wei Pai
+
+质量管理：Teddy Peng，Hannah Lin
+
+制作协助：山添 公雄，谷本 绫朋，吉川 达哉
+久堀 启次，增田 智裕，山本 节生
+片桐 秀朗，小林 美保
+大平 健太郎，小山良平
+
+
+制作人：松川 美苗
+制作总指挥：三并 达也
+®
+CAPCOM
