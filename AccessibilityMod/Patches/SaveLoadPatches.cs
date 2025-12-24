@@ -498,7 +498,6 @@ namespace AccessibilityMod.Patches
         private static FieldInfo _currentNumField;
         private static FieldInfo _availableOptionField;
         private static FieldInfo _optionTitleField;
-        private static FieldInfo _titleBackTextField;
 
         private static readonly BindingFlags NonPublicInstance =
             BindingFlags.NonPublic | BindingFlags.Instance;
@@ -638,43 +637,109 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                if (_titleBackTextField == null)
-                    _titleBackTextField = typeof(optionCtrl).GetField(
-                        "title_back_text_",
-                        NonPublicInstance
-                    );
-
-                if (_titleBackTextField == null)
+                // Get current option index to determine which tooltip to read
+                int currentIndex = GetCurrentOptionIndex(instance);
+                if (currentIndex < 0)
                     return null;
 
-                var titleBackTextList =
-                    _titleBackTextField.GetValue(instance) as List<UnityEngine.UI.Text>;
-                if (titleBackTextList == null || titleBackTextList.Count == 0)
+                // Check if the current option is optionStory (has special warning text)
+                var options = GetAvailableOptions(instance);
+                if (options != null && currentIndex < options.Count)
+                {
+                    var currentOption = options[currentIndex];
+                    string storyWarning = GetStoryModeWarningText(currentOption);
+                    if (!Net35Extensions.IsNullOrWhiteSpace(storyWarning))
+                        return storyWarning;
+                }
+
+                // Get begin_num_ to calculate actual OptionItem
+                var beginNumField = typeof(optionCtrl).GetField("begin_num_", NonPublicInstance);
+                if (beginNumField == null)
+                    return null;
+
+                int beginNum = (int)beginNumField.GetValue(instance);
+                int optionItemIndex = currentIndex + beginNum;
+
+                // Get the tooltip text ID from option_description_ array
+                var optionDescField = typeof(optionCtrl).GetField(
+                    "option_description_",
+                    NonPublicInstance
+                );
+                if (optionDescField == null)
+                    return null;
+
+                var optionDescArray =
+                    optionDescField.GetValue(instance) as TextDataCtrl.OptionTextID[];
+                if (optionDescArray == null || optionItemIndex >= optionDescArray.Length)
+                    return null;
+
+                TextDataCtrl.OptionTextID textId = optionDescArray[optionItemIndex];
+
+                // Get ALL lines of tooltip text using GetTexts
+                string[] allLines = TextDataCtrl.GetTexts(textId);
+                if (allLines == null || allLines.Length == 0)
                     return null;
 
                 // Get the current key type for button prompts
                 string keyName = GetCurrentKeyName(instance);
 
-                // Combine both lines of tooltip text
-                string line1 = titleBackTextList.Count > 0 ? titleBackTextList[0]?.text : null;
-                string line2 = titleBackTextList.Count > 1 ? titleBackTextList[1]?.text : null;
-
-                // Replace button icon placeholders (whitespace sequences) with key name
-                if (!Net35Extensions.IsNullOrWhiteSpace(keyName))
+                // Join all lines and replace button placeholders
+                var parts = new List<string>();
+                foreach (string line in allLines)
                 {
-                    line1 = ReplaceButtonPlaceholder(line1, keyName);
-                    line2 = ReplaceButtonPlaceholder(line2, keyName);
+                    if (!Net35Extensions.IsNullOrWhiteSpace(line))
+                    {
+                        string processedLine = line;
+                        if (!Net35Extensions.IsNullOrWhiteSpace(keyName))
+                        {
+                            processedLine = ReplaceButtonPlaceholder(processedLine, keyName);
+                        }
+                        parts.Add(processedLine);
+                    }
                 }
 
-                string tooltip = "";
-                if (!Net35Extensions.IsNullOrWhiteSpace(line1))
-                    tooltip = line1;
-                if (!Net35Extensions.IsNullOrWhiteSpace(line2))
-                    tooltip = Net35Extensions.IsNullOrWhiteSpace(tooltip)
-                        ? line2
-                        : tooltip + " " + line2;
+                return parts.Count > 0 ? string.Join(" ", parts.ToArray()) : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
-                return tooltip;
+        // optionStory has special warning_text that contains the detailed Story Mode description
+        private static string GetStoryModeWarningText(optionItem option)
+        {
+            try
+            {
+                // Check if this is an optionStory instance
+                if (option == null || option.GetType().Name != "optionStory")
+                    return null;
+
+                // Get the warning_text field
+                var warningTextField = option
+                    .GetType()
+                    .GetField("warning_text", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (warningTextField == null)
+                    return null;
+
+                var warningTextList = warningTextField.GetValue(option) as List<Text>;
+                if (warningTextList == null || warningTextList.Count == 0)
+                    return null;
+
+                // Collect all non-empty warning text lines
+                var parts = new List<string>();
+                foreach (var textComponent in warningTextList)
+                {
+                    if (
+                        textComponent != null
+                        && !Net35Extensions.IsNullOrWhiteSpace(textComponent.text)
+                    )
+                    {
+                        parts.Add(textComponent.text);
+                    }
+                }
+
+                return parts.Count > 0 ? string.Join(" ", parts.ToArray()) : null;
             }
             catch
             {
@@ -689,43 +754,44 @@ namespace AccessibilityMod.Patches
         {
             try
             {
-                if (_titleBackTextField == null)
-                    _titleBackTextField = typeof(optionCtrl).GetField(
-                        "title_back_text_",
-                        NonPublicInstance
-                    );
-
-                if (_titleBackTextField == null)
+                // Get the tooltip text ID from option_category_description_ array
+                var catDescField = typeof(optionCtrl).GetField(
+                    "option_category_description_",
+                    NonPublicInstance
+                );
+                if (catDescField == null)
                     return null;
 
-                var titleBackTextList =
-                    _titleBackTextField.GetValue(instance) as List<UnityEngine.UI.Text>;
-                if (titleBackTextList == null || titleBackTextList.Count == 0)
+                var catDescArray = catDescField.GetValue(instance) as TextDataCtrl.OptionTextID[];
+                if (catDescArray == null || (int)category >= catDescArray.Length)
+                    return null;
+
+                TextDataCtrl.OptionTextID textId = catDescArray[(int)category];
+
+                // Get ALL lines of tooltip text using GetTexts
+                string[] allLines = TextDataCtrl.GetTexts(textId);
+                if (allLines == null || allLines.Length == 0)
                     return null;
 
                 // Get the key type for button prompts based on category
                 string keyName = GetCategoryKeyName(category);
 
-                // Combine both lines of tooltip text
-                string line1 = titleBackTextList.Count > 0 ? titleBackTextList[0]?.text : null;
-                string line2 = titleBackTextList.Count > 1 ? titleBackTextList[1]?.text : null;
-
-                // Replace button icon placeholders (whitespace sequences) with key name
-                if (!Net35Extensions.IsNullOrWhiteSpace(keyName))
+                // Join all lines and replace button placeholders
+                var parts = new List<string>();
+                foreach (string line in allLines)
                 {
-                    line1 = ReplaceButtonPlaceholder(line1, keyName);
-                    line2 = ReplaceButtonPlaceholder(line2, keyName);
+                    if (!Net35Extensions.IsNullOrWhiteSpace(line))
+                    {
+                        string processedLine = line;
+                        if (!Net35Extensions.IsNullOrWhiteSpace(keyName))
+                        {
+                            processedLine = ReplaceButtonPlaceholder(processedLine, keyName);
+                        }
+                        parts.Add(processedLine);
+                    }
                 }
 
-                string tooltip = "";
-                if (!Net35Extensions.IsNullOrWhiteSpace(line1))
-                    tooltip = line1;
-                if (!Net35Extensions.IsNullOrWhiteSpace(line2))
-                    tooltip = Net35Extensions.IsNullOrWhiteSpace(tooltip)
-                        ? line2
-                        : tooltip + " " + line2;
-
-                return tooltip;
+                return parts.Count > 0 ? string.Join(" ", parts.ToArray()) : null;
             }
             catch
             {
