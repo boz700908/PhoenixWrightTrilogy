@@ -440,9 +440,13 @@ namespace AccessibilityMod.Services
             }
             else if (lineCount < 3)
             {
-                return L.Get("dying_message.hint_continue_e");
+                return L.Get("dying_message.hint_draw_e");
             }
-            else if (lineCount < 6)
+            else if (lineCount < 5)
+            {
+                return L.Get("dying_message.hint_draw_m");
+            }
+            else if (lineCount < 8)
             {
                 return L.Get("dying_message.hint_draw_a");
             }
