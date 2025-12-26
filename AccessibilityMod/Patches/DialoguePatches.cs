@@ -23,6 +23,10 @@ namespace AccessibilityMod.Patches
         internal static string _lastAnnouncedText = "";
         private static int _lastSpeakerId = -1;
 
+        // Track whether an arrow has appeared since board opened
+        // Used to detect transition text (which never shows an arrow)
+        private static bool _arrowAppearedSinceBoardOpened = false;
+
         // Regex for detecting button placeholders (multiple spaces or full-width spaces)
         private static readonly Regex SpacePlaceholderRegex = new Regex(
             @"[\u3000]+| {3,}",
@@ -48,6 +52,8 @@ namespace AccessibilityMod.Patches
                 if (in_arrow)
                 {
                     // Normal case: arrow appearing means text is complete
+                    // Mark that arrow appeared so delayed transition capture knows to skip
+                    _arrowAppearedSinceBoardOpened = true;
                     TryOutputDialogue();
                 }
                 else if (IsInCrossExaminationMode())
@@ -212,6 +218,8 @@ namespace AccessibilityMod.Patches
 
         /// <summary>
         /// Hook when message board opens/closes. Reset tracking when closed.
+        /// Also handles episode transition text ("To be continued", etc.) which
+        /// uses a different rendering path without arrows.
         /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(typeof(messageBoardCtrl), "board")]
@@ -225,12 +233,90 @@ namespace AccessibilityMod.Patches
                     _lastAnnouncedText = "";
                     _lastSpeakerId = -1;
                 }
+                else
+                {
+                    // Board opening - reset arrow tracking and schedule delayed capture
+                    // for transition text (which doesn't show arrows)
+                    _arrowAppearedSinceBoardOpened = false;
+
+                    // Schedule a delayed capture to catch transition text like "To be continued"
+                    // This text appears 1-2 frames after board opens, with no arrow
+                    CoroutineRunner.Instance?.StartCoroutine(DelayedTransitionTextCapture());
+                }
             }
             catch (Exception ex)
             {
                 AccessibilityMod.Core.AccessibilityMod.Logger?.Error(
                     $"Error in Board patch: {ex.Message}"
                 );
+            }
+        }
+
+        /// <summary>
+        /// Check if the episode release screen is currently active and scrolling is done.
+        /// </summary>
+        private static bool IsEpisodeReleaseActive()
+        {
+            try
+            {
+                var episodeRelease = episodeReleaseCtrl.instance;
+                return episodeRelease != null
+                    && episodeRelease.is_play
+                    && !episodeRelease.is_scroll;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Delayed capture for transition text like "To be continued".
+        /// Waits a few frames for text to render, then announces if no arrow appeared.
+        /// This is more efficient than a continuous monitor - just a single check after delay.
+        /// </summary>
+        private static System.Collections.IEnumerator DelayedTransitionTextCapture()
+        {
+            // Wait 3 frames for text to render (text appears at frame 1-2)
+            for (int i = 0; i < 3; i++)
+            {
+                yield return null;
+            }
+
+            // If an arrow appeared, normal dialogue handling took care of it
+            if (_arrowAppearedSinceBoardOpened)
+                yield break;
+
+            // Check if board is still active with unannounced text
+            var ctrl = messageBoardCtrl.instance;
+            if (ctrl == null || !ctrl.body_active)
+                yield break;
+
+            // Transition text never has a speaker name plate - skip if speaker is shown
+            // This filters out normal dialogue that somehow got here
+            bool namePlateVisible = false;
+            try
+            {
+                namePlateVisible = ctrl.sprite_name != null && ctrl.sprite_name.active;
+            }
+            catch { }
+
+            if (namePlateVisible)
+                yield break;
+
+            string text = CombineLines(ctrl);
+            string cleanedText = TextCleaner.Clean(text);
+
+            // Require minimum length to avoid partial character-by-character renders
+            // Transition text like "To be continued." is 17+ chars
+            if (
+                !Net35Extensions.IsNullOrWhiteSpace(cleanedText)
+                && cleanedText.Length >= 10
+                && text != _lastAnnouncedText
+            )
+            {
+                _lastAnnouncedText = text;
+                SpeechManager.Output("", text, TextType.Narrator);
             }
         }
 
