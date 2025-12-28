@@ -14,6 +14,21 @@ cd AccessibilityMod
 dotnet build -c Release
 
 # The post-build target copies AccessibilityMod.dll to $(GamePath)\Mods
+# and copies Data/* files to $(GamePath)\UserData\AccessibilityMod\
+```
+
+## Utility Projects
+
+```bash
+# Validate translations against English strings.json
+cd LocalizationValidator
+dotnet run -- ja                    # Validate Japanese
+dotnet run -- fr --strict           # Validate French, treat warnings as errors
+
+# Build the standalone installer (publishes self-contained .exe)
+cd Installer
+dotnet publish -c Release
+# Output: Installer/bin/Release/net8.0-windows/win-x64/publish/PWAATAccessibilityInstaller.exe
 ```
 
 ## Key Configuration

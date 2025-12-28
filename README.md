@@ -30,10 +30,22 @@ A screen reader accessibility mod for Phoenix Wright: Ace Attorney Trilogy. The 
 
 ## Installation
 
-1. Install MelonLoader to your game directory
-2. Copy `AccessibilityMod.dll` to the `Mods` folder in your game directory
-3. Copy `UniversalSpeech.dll` and `nvdaControllerClient.dll` (32-bit) to your game directory
-4. Launch the game
+Each release includes two assets: an installer executable for automatic installation, and a zip file for manual installation.
+
+### Automatic Installation
+
+1. Download `PWAATAccessibilityInstaller.exe` from the latest release
+2. Run the installer and follow the prompts
+3. Launch the game
+
+### Manual Installation
+
+1. Download the zip file from the latest release
+2. Run the included `MelonLoader.Installer.exe` and install MelonLoader to your game
+3. Copy `AccessibilityMod.dll` to the `Mods` folder in your game directory
+4. Copy `UniversalSpeech.dll` and `nvdaControllerClient.dll` to your game directory
+5. Copy the `Data` folder contents to `[Game Directory]/UserData/AccessibilityMod/`
+6. Launch the game
 
 ## Keyboard Shortcuts
 
@@ -72,7 +84,7 @@ cd AccessibilityMod
 dotnet build -c Release
 ```
 
-The build output is automatically copied to the game's `Mods` folder.
+The build output is automatically copied to the game's `Mods` folder, along with the contents of the `Data` folder which are copied to `UserData/AccessibilityMod`.
 
 ### Build Requirements
 
