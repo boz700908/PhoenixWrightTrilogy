@@ -49,13 +49,13 @@ namespace AccessibilityMod.Patches
                 if (in_arrow)
                 {
                     // Normal case: arrow appearing means text is complete
-                    TryOutputDialogue();
+                    TryOutputDialogue("Arrow");
                 }
                 else if (IsInCrossExaminationMode())
                 {
                     // Cross-examination: on the last testimony line, the arrow is hidden
                     // but we still need to read the dialogue.
-                    TryOutputDialogue();
+                    TryOutputDialogue("Arrow_CrossExam");
                 }
             }
             catch (Exception ex)
@@ -93,7 +93,7 @@ namespace AccessibilityMod.Patches
                 // Only output if the game is actually waiting for input, not during text display
                 if (IsDialogueGuideType(in_type) && IsWaitingForInput())
                 {
-                    TryOutputDialogue();
+                    TryOutputDialogue("GuideIconSet");
                 }
             }
             catch (Exception ex)
@@ -117,7 +117,7 @@ namespace AccessibilityMod.Patches
                 // Only output if the game is actually waiting for input, not during text display
                 if (IsDialogueGuideType(in_type) && IsWaitingForInput())
                 {
-                    TryOutputDialogue();
+                    TryOutputDialogue("ChangeGuide");
                 }
             }
             catch (Exception ex)
@@ -173,7 +173,10 @@ namespace AccessibilityMod.Patches
         #region Message Board Hooks
 
         /// <summary>
-        /// Hook when message board opens/closes. Reset tracking when closed.
+        /// Hook when message board opens/closes. Reset speaker tracking when closed.
+        /// Note: We intentionally do NOT reset _lastAnnouncedText here because the board
+        /// can close and reopen briefly during cross-examination (when pressing statements),
+        /// and we don't want to re-announce the same text.
         /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(typeof(messageBoardCtrl), "board")]
@@ -183,11 +186,10 @@ namespace AccessibilityMod.Patches
             {
                 if (!in_board)
                 {
-                    // Dialogue window closed - reset tracking
-                    _lastAnnouncedText = "";
+                    // Dialogue window closed - reset speaker tracking only
+                    // Keep _lastAnnouncedText to prevent re-announcing same text after brief closes
                     _lastSpeakerId = -1;
                 }
-                // else: Board opening - no action needed
             }
             catch (Exception ex)
             {
@@ -300,7 +302,7 @@ namespace AccessibilityMod.Patches
             {
                 if (__instance.body_active)
                 {
-                    TryOutputDialogue();
+                    TryOutputDialogue("LoadMsgSet");
                 }
             }
             catch (Exception ex)
@@ -340,9 +342,13 @@ namespace AccessibilityMod.Patches
                 if (ctrl == null || !ctrl.body_active)
                     return;
 
+                // Skip when message board text is stale (court record, evidence details, 3D evidence)
+                if (IsInStaleDialogueMode())
+                    return;
+
                 // Always try to capture - duplicate detection will prevent double announcements
                 // This ensures we catch auto-advancing dialogue that other hooks might miss
-                TryOutputDialogue();
+                TryOutputDialogue("ClearText");
             }
             catch (Exception ex)
             {
@@ -381,23 +387,15 @@ namespace AccessibilityMod.Patches
                     return;
                 }
 
-                // Skip when already in court record, evidence details, or 3D evidence mode.
-                // The message board text is stale in these modes - capturing here would
-                // re-announce old dialogue (e.g., when presenting evidence from court record).
-                if (
-                    AccessibilityState.IsInCourtRecordMode()
-                    || AccessibilityState.IsInEvidenceDetailsMode()
-                    || AccessibilityState.IsIn3DEvidenceMode()
-                )
-                {
+                // Skip when message board text is stale (court record, evidence details, 3D evidence)
+                if (IsInStaleDialogueMode())
                     return;
-                }
 
                 // Capture dialogue before any window opens
                 var ctrl = messageBoardCtrl.instance;
                 if (ctrl != null && ctrl.body_active)
                 {
-                    TryOutputDialogue();
+                    TryOutputDialogue("SetReq");
                 }
             }
             catch (Exception ex)
@@ -411,6 +409,17 @@ namespace AccessibilityMod.Patches
         #endregion
 
         #region Helper Methods
+
+        /// <summary>
+        /// Check if we're in a mode where the message board text is stale and shouldn't
+        /// be captured. This includes court record, evidence details, and 3D evidence modes.
+        /// </summary>
+        private static bool IsInStaleDialogueMode()
+        {
+            return AccessibilityState.IsInCourtRecordMode()
+                || AccessibilityState.IsInEvidenceDetailsMode()
+                || AccessibilityState.IsIn3DEvidenceMode();
+        }
 
         /// <summary>
         /// Check if we're in cross-examination mode (testimony with LOOP status).
@@ -437,7 +446,8 @@ namespace AccessibilityMod.Patches
         /// Central method for attempting to output dialogue.
         /// Handles duplicate detection and all the logic for extracting and announcing text.
         /// </summary>
-        private static void TryOutputDialogue()
+        /// <param name="source">The name of the hook that triggered this call (for debug logging)</param>
+        private static void TryOutputDialogue(string source = "unknown")
         {
             try
             {
@@ -448,8 +458,19 @@ namespace AccessibilityMod.Patches
                 // Get text from line_list
                 string text = CombineLines(ctrl);
 
-                if (Net35Extensions.IsNullOrWhiteSpace(text) || text == _lastAnnouncedText)
+                if (Net35Extensions.IsNullOrWhiteSpace(text))
                     return;
+
+                if (text == _lastAnnouncedText)
+                {
+#if DEBUG
+                    string preview = text.Length > 40 ? text.Substring(0, 40) + "..." : text;
+                    AccessibilityMod.Core.AccessibilityMod.Logger?.Msg(
+                        $"[DialoguePatches:{source}] Skipped duplicate: \"{preview}\""
+                    );
+#endif
+                    return;
+                }
 
                 _lastAnnouncedText = text;
 
@@ -525,6 +546,13 @@ namespace AccessibilityMod.Patches
                         speakerName = CharacterNameService.GetName(speakerId);
                     }
                 }
+
+#if DEBUG
+                string textPreview = text.Length > 50 ? text.Substring(0, 50) + "..." : text;
+                AccessibilityMod.Core.AccessibilityMod.Logger?.Msg(
+                    $"[DialoguePatches:{source}] Announcing: speaker=\"{speakerName}\", text=\"{textPreview}\""
+                );
+#endif
 
                 SpeechManager.Output(speakerName, text, GameTextType.Dialogue);
             }
