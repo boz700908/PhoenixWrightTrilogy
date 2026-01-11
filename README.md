@@ -103,6 +103,7 @@ The mod supports multiple languages. Currently included translations:
 - English
 - Brazilian Portuguese
 - Chinese (Simplified)
+- Korean
 
 Want to help translate? See [TRANSLATORS.md](TRANSLATORS.md) for guidelines.
 
