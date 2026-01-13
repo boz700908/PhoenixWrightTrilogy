@@ -6,9 +6,9 @@ namespace Installer.Services;
 
 public class GitHubReleaseService : IDisposable
 {
-    private const string RepoOwner = "LordLuceus";
+    private const string RepoOwner = "AccessMods";
     private const string RepoName = "PhoenixWrightTrilogy";
-    private const string UserAgent = "PWAATAccessibilityInstaller/1.0";
+    private const string UserAgent = "PWAATAccessibilityInstaller/1.2.0";
 
     private readonly HttpClient _httpClient;
 

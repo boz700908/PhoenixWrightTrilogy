@@ -8,7 +8,7 @@ public class ModInstallerService
     private const string UserDataFolder = "UserData";
     private const string AccessibilityModFolder = "AccessibilityMod";
     private const string ModDll = "AccessibilityMod.dll";
-    private const string MelonAccessibilityLibDll = "MelonAccessibilityLib.dll";
+    private const string UnityAccessibilityLibDll = "UnityAccessibilityLib.dll";
     private const string UniversalSpeechDll = "UniversalSpeech.dll";
     private const string NvdaClientDll = "nvdaControllerClient.dll";
     private const string DataFolder = "Data";
@@ -83,10 +83,10 @@ public class ModInstallerService
         var modDllDest = Path.Combine(modsPath, ModDll);
         CopyFile(modDllSource, modDllDest, statusCallback);
 
-        // Copy MelonAccessibilityLib.dll to game root
-        var melonLibSource = Path.Combine(extractedRoot, MelonAccessibilityLibDll);
-        var melonLibDest = Path.Combine(gamePath, MelonAccessibilityLibDll);
-        CopyFile(melonLibSource, melonLibDest, statusCallback);
+        // Copy UnityAccessibilityLib.dll to game root
+        var unityA11yLibSource = Path.Combine(extractedRoot, UnityAccessibilityLibDll);
+        var unityA11yLibDest = Path.Combine(gamePath, UnityAccessibilityLibDll);
+        CopyFile(unityA11yLibSource, unityA11yLibDest, statusCallback);
 
         // Copy UniversalSpeech.dll to game root
         var universalSpeechSource = Path.Combine(extractedRoot, UniversalSpeechDll);
