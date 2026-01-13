@@ -43,7 +43,7 @@ Each release includes two assets: an installer executable for automatic installa
 1. Download the zip file from the latest release
 2. Run the included `MelonLoader.Installer.exe` and install MelonLoader to your game
 3. Copy `AccessibilityMod.dll` to the `Mods` folder in your game directory
-4. Copy `MelonAccessibilityLib.dll`, `UniversalSpeech.dll` and `nvdaControllerClient.dll` to your game directory
+4. Copy `UnityAccessibilityLib.dll`, `UniversalSpeech.dll` and `nvdaControllerClient.dll` to your game directory
 5. Copy the `Data` folder contents to `[Game Directory]/UserData/AccessibilityMod/`
 6. Launch the game
 
@@ -56,8 +56,8 @@ Each release includes two assets: an installer executable for automatic installa
 | **I**     | Global            | Announce current state/context                     |
 | **[ / ]** | Navigation modes  | Navigate items (hotspots, evidence, targets, etc.) |
 | **U**     | Investigation     | Jump to next unexamined hotspot                    |
-| **H**     | Context-sensitive | List hotspots, get hints, or announce life gauge   |
-| **F1**    | Orchestra mode    | Announce controls help                             |
+| **H**     | Trial | announce life gauge   |
+| **F1**    | Context-sensitive    | Announce                             help hints |
 
 ## Configuration
 
