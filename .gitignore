@@ -324,3 +324,6 @@ MigrationBackup/
 
 # Decompiled code
 Decompiled/
+
+.letta/*
+!.letta/settings.json
