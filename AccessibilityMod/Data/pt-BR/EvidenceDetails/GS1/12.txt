@@ -1,0 +1,22 @@
+Incidente No. SL-9:
+Encerrado.
+Criminoso: Edson Brás.
+Crime: Assassinatos em série.
+Sentença: Pena de morte.
+===
+Vítimas:
+Edir Soares,
+Eloísa Quirino,
+João Bastos,
+José Cavalera,
+Raquel Lima,
+Oscar Bandeiras.
+===
+Dados do Julgamento:
+Promotor-chefe: Miles Edgeworth.
+Testemunhas: Lana Celestini, Ema Celestini.
+===
+Força Tarefa de Investigação:
+Investigadores de campo: Adriano Gant, Lana Celestini.
+Investigador-chefe: Benício Boaventura.
+Investigadores: Alef Bandeiras, Angélica Estela.
